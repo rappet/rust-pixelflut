@@ -1,0 +1,18 @@
+[package]
+name = "rust-pixelflut"
+version = "0.0.1"
+authors = ["Raphael Peters <raphael.r.peters@gmail.com>"]
+license = "MIT/Apache-2.0"
+readme = "README.md"
+description = """
+An unfinished library for encoding and decoding pixelflut messages providing a
+simple async protocol interface using tokio.
+"""
+
+[dependencies]
+bytes = "0.4"
+futures = "0.1"
+tokio-io = "0.1"
+tokio-core = ""
+tokio-proto = ""
+tokio-service = "0.1"
