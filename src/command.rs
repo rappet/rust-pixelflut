@@ -19,7 +19,7 @@
 use std::{fmt};
 use std::str::FromStr;
 
-use color::Color;
+use pixel::Color;
 use error::{Error, Result};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -71,7 +71,7 @@ mod test {
     #[test]
     fn display() {
         use command::Command;
-        use color::Color;
+        use pixel::Color;
         use error::{Error, Result};
 
         assert_eq!(
