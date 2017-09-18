@@ -8,6 +8,8 @@ description = """
 An unfinished library for encoding and decoding pixelflut messages providing a
 simple async protocol interface using tokio.
 """
+homepage = "https://github.com/rappet/rust-pixelflut"
+repository = "https://github.com/rappet/rust-pixelflut"
 
 [dependencies]
 bytes = "0.4"
