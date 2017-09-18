@@ -17,11 +17,14 @@ use error::{Error, Result};
 /// # Examples
 ///
 /// ```
-/// let a: Color = "ff0000".parse();
+/// use rust_pixelflut::Color;
+/// use rust_pixelflut::error::Result;
+///
+/// let a: Result<Color> = "ff0000".parse();
 /// let b = Color::rgb(255, 0, 0);
 /// assert_eq!(a.unwrap(), b);
 ///
-/// let c: Color = "ff0000dd".parse();
+/// let c: Result<Color> = "ff0000dd".parse();
 /// let d = Color::rgba(0xff, 0, 0, 0xdd);
 /// assert_eq!(c.unwrap(), d);
 /// ```
@@ -41,6 +44,7 @@ impl Color {
     /// Basic usage:
     ///
     /// ```no_run
+    /// use rust_pixelflut::Color;
     /// Color::rgb(255, 255, 255);
     /// ```
     pub fn rgb(r: u8, g: u8, b: u8) -> Color {
@@ -59,6 +63,7 @@ impl Color {
     /// Basic usage:
     ///
     /// ```no_run
+    /// use rust_pixelflut::Color;
     /// Color::rgba(255, 255, 255, 255);
     /// ```
     pub fn rgba(r: u8, g: u8, b: u8, a: u8) -> Color {
@@ -77,6 +82,7 @@ impl Color {
     /// # Examples
     ///
     /// ```no_run
+    /// use rust_pixelflut::Color;
     /// assert_eq!((255, 0, 0, 255), Color::rgb(255, 0, 0).normalized())
     /// ```
     pub fn normalized(&self) -> (u8, u8, u8, u8) {
@@ -127,7 +133,6 @@ impl fmt::Debug for Color {
 #[cfg(test)]
 mod tests {
     use super::{Color, Error};
-    use std::num::ParseIntError;
 
     #[test]
     fn test_rgb() {
