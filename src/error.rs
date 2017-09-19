@@ -1,11 +1,12 @@
-use std::{fmt, io, error, result};
+use std::fmt;
+use std::result::Result as StdResult;
 use std::error::Error as StdError;
-use std::io::Error as IoError;
+use std::io;
 use std::num::ParseIntError;
 
 #[derive(Debug)]
 pub enum Error {
-    Io(IoError),
+    Io(io::Error),
     ColorLength,
     ParseInt(ParseIntError),
     InvalidCommand,
@@ -13,9 +14,9 @@ pub enum Error {
     LineTooLong,
 }
 
-pub type Result<T> = result::Result<T, Error>;
+pub type Result<T> = StdResult<T, Error>;
 
-impl error::Error for Error {
+impl StdError for Error {
     fn description(&self) -> &str {
         match *self {
             Error::Io(ref err) => err.description(),
@@ -56,8 +57,8 @@ impl fmt::Display for Error {
     }
 }
 
-impl From<IoError> for Error {
-    fn from(err: IoError) -> Error {
+impl From<io::Error> for Error {
+    fn from(err: io::Error) -> Error {
         Error::Io(err)
     }
 }
@@ -68,8 +69,8 @@ impl From<ParseIntError> for Error {
     }
 }
 
-impl Into<IoError> for Error {
-    fn into(self) -> IoError {
-        IoError::new(io::ErrorKind::InvalidData, self.description())
+impl Into<io::Error> for Error {
+    fn into(self) -> io::Error {
+        io::Error::new(io::ErrorKind::InvalidData, self.description())
     }
 }

@@ -1,5 +1,5 @@
 [package]
-name = "rust-pixelflut"
+name = "pixelflut"
 version = "0.0.1"
 authors = ["Raphael Peters <raphael.r.peters@gmail.com>"]
 license = "MIT/Apache-2.0"
