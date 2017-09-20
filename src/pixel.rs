@@ -61,19 +61,6 @@ impl Coordinate {
             y: y,
         }
     }
-
-    /// returns x and y coordinate
-    ///
-    /// ```no_run
-    /// use pixelflut::Coordinate;
-    /// let pos = Coordinate::new(1, 2);
-    /// let (x, y) = pos.xy();
-    /// assert_eq!(1, x);
-    /// assert_eq!(2, y);
-    /// ```
-    pub fn xy(&self) -> (u32, u32) {
-        (self.x, self.y)
-    }
 }
 
 impl fmt::Display for Coordinate {
@@ -98,7 +85,7 @@ impl Color {
     /// Basic usage:
     ///
     /// ```no_run
-    /// use pixelflut::Color;
+    /// use rust_pixelflut::Color;
     /// Color::rgb(255, 255, 255);
     /// ```
     pub fn rgb(r: u8, g: u8, b: u8) -> Color {
@@ -117,7 +104,7 @@ impl Color {
     /// Basic usage:
     ///
     /// ```no_run
-    /// use pixelflut::Color;
+    /// use rust_pixelflut::Color;
     /// Color::rgba(255, 255, 255, 255);
     /// ```
     pub fn rgba(r: u8, g: u8, b: u8, a: u8) -> Color {
@@ -136,7 +123,7 @@ impl Color {
     /// # Examples
     ///
     /// ```no_run
-    /// use pixelflut::Color;
+    /// use rust_pixelflut::Color;
     /// assert_eq!((255, 0, 0, 255), Color::rgb(255, 0, 0).normalized())
     /// ```
     pub fn normalized(&self) -> (u8, u8, u8, u8) {

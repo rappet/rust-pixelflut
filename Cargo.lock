@@ -1,5 +1,5 @@
 [root]
-name = "pixelflut"
+name = "rust-pixelflut"
 version = "0.0.1"
 dependencies = [
  "bytes 0.4.5 (registry+https://github.com/rust-lang/crates.io-index)",

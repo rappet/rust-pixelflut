@@ -4,8 +4,8 @@
 //!
 //! Parsing commands:
 //! ```
-//! use pixelflut::Command;
-//! use pixelflut::error::Result;
+//! use rust_pixelflut::Command;
+//! use rust_pixelflut::error::Result;
 //!
 //! let command: Result<Command> = "PX 10 20 aabbcc".parse();
 //!
@@ -16,7 +16,7 @@
 //! }
 //! ```
 
-use std::fmt;
+use std::{fmt};
 use std::str::FromStr;
 
 use pixel::Color;
