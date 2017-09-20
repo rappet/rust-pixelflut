@@ -9,12 +9,7 @@ impl Decoder for PixelflutCodec {
             let line = buf.split_to(i);
             buf.split_to(1);
 
-            match str::from_utf8(&line) {
-                Ok(s) => Ok(Some(s.parse()?)),
-                Err(_) => Err(IoError::new(io::ErrorKind::Other,
-                                           "invalid UTF-8").into()),
-            }
-
+            Ok(str::from_utf8(&line)?.parse()?)
         } else if buf.len() > 34 { // longest possible command
             Err(Error::LineTooLong)
         } else {

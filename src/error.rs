@@ -1,5 +1,6 @@
 use std::{fmt, io, error, result};
 use std::error::Error as StdError;
+use std::str::Utf8Error;
 use std::io::Error as IoError;
 use std::num::ParseIntError;
 
@@ -10,6 +11,7 @@ pub enum Error {
     ParseInt(ParseIntError),
     InvalidCommand,
     WrongNumberOfArguments,
+    Utf8Error,
     LineTooLong,
 }
 
@@ -23,6 +25,7 @@ impl error::Error for Error {
             Error::ParseInt(ref err) => err.description(),
             Error::InvalidCommand => "Invalid command",
             Error::WrongNumberOfArguments => "Wrong number of arguments",
+            Error::Utf8Error => "Wrong UTF-8",
             Error::LineTooLong => "Line is longer than longest possible command",
         }
     }
@@ -37,6 +40,7 @@ impl PartialEq for Error {
             (&Error::ParseInt(ref a), &Error::ParseInt(ref b)) => a == b,
             (&Error::InvalidCommand, &Error::InvalidCommand) => true,
             (&Error::WrongNumberOfArguments, &Error::WrongNumberOfArguments) => true,
+            (&Error::Utf8Error, &Error::Utf8Error) => true,
             (&Error::LineTooLong, &Error::LineTooLong) => true,
             _ => false,
         }
@@ -45,14 +49,7 @@ impl PartialEq for Error {
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Error::Io(ref err) => write!(f, "Io Error: {}", err),
-            Error::ColorLength => write!(f, "PixelflutError: wrong length for color field"),
-            Error::ParseInt(ref err) => write!(f, "ParseIntError: {}", err),
-            Error::InvalidCommand => write!(f, "PixelflutError: Invalid Command"),
-            Error::WrongNumberOfArguments => write!(f, "PixelflutError: Wrong number of arguments"),
-            Error::LineTooLong => write!(f, "PixelflutError: A client send a too long line"),
-        }
+        write!(f, "Pixelflut Error: {}", self.description())
     }
 }
 
@@ -65,6 +62,12 @@ impl From<IoError> for Error {
 impl From<ParseIntError> for Error {
     fn from(err: ParseIntError) -> Error {
         Error::ParseInt(err)
+    }
+}
+
+impl From<Utf8Error> for Error {
+    fn from(_: Utf8Error) -> Error {
+        Error::Utf8Error
     }
 }
 
