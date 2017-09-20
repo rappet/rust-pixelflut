@@ -85,7 +85,7 @@ impl Color {
     /// Basic usage:
     ///
     /// ```no_run
-    /// use rust_pixelflut::Color;
+    /// use pixelflut::Color;
     /// Color::rgb(255, 255, 255);
     /// ```
     pub fn rgb(r: u8, g: u8, b: u8) -> Color {
@@ -104,7 +104,7 @@ impl Color {
     /// Basic usage:
     ///
     /// ```no_run
-    /// use rust_pixelflut::Color;
+    /// use pixelflut::Color;
     /// Color::rgba(255, 255, 255, 255);
     /// ```
     pub fn rgba(r: u8, g: u8, b: u8, a: u8) -> Color {
@@ -123,7 +123,7 @@ impl Color {
     /// # Examples
     ///
     /// ```no_run
-    /// use rust_pixelflut::Color;
+    /// use pixelflut::Color;
     /// assert_eq!((255, 0, 0, 255), Color::rgb(255, 0, 0).normalized())
     /// ```
     pub fn normalized(&self) -> (u8, u8, u8, u8) {
