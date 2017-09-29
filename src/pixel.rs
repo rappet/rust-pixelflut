@@ -12,7 +12,7 @@ pub struct Pixel {
 
 impl Pixel {
     /// construct a new `Pixel` with a `Coordinate` and a `Color`
-    fn new(position: Coordinate, color: Color) -> Pixel {
+    pub fn new(position: Coordinate, color: Color) -> Pixel {
         Pixel {
             position: position,
             color: color,
