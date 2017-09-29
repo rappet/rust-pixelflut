@@ -135,6 +135,7 @@ mod test {
 
     #[test]
     fn is_clientbound() {
+        use command::Command;
         assert!( !"PX 12 34 112233".parse::<Command>().unwrap().is_clientbound() );
         assert!( !"SIZE".parse::<Command>().unwrap().is_clientbound() );
         assert!( "SIZE 12 34".parse::<Command>().unwrap().is_clientbound() );
@@ -142,6 +143,7 @@ mod test {
 
     #[test]
     fn is_serverbound() {
+        use command::Command;
         assert!( "PX 12 34 112233".parse::<Command>().unwrap().is_serverbound() );
         assert!( "SIZE".parse::<Command>().unwrap().is_serverbound() );
         assert!( !"SIZE 12 34".parse::<Command>().unwrap().is_serverbound() );
