@@ -1,6 +1,6 @@
 use command::Command;
 use codec::PixelflutCodec;
-use error::{Error, Result};
+use error::{Error, ErrorKind};
 
 use futures::{Async, Future, Poll, Sink, StartSend, Stream};
 
@@ -74,7 +74,7 @@ where
             if command.is_clientbound() {
                 Ok(Async::Ready(Some(command)))
             } else {
-                Err(Error::InvalidCommand)
+                Err(ErrorKind::InvalidCommand.into())
             }
         } else {
             Ok(Async::Ready(command))
@@ -93,7 +93,7 @@ where
         if item.is_serverbound() {
             Ok(self.inner.start_send(item)?)
         } else {
-            Err(Error::InvalidCommand)
+            Err(ErrorKind::InvalidCommand.into())
         }
     }
 

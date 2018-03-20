@@ -15,6 +15,10 @@ repository = "https://github.com/rappet/rust-pixelflut"
 bytes = "0.4"
 futures = "0.1"
 tokio-io = "0.1"
-tokio-core = ""
-tokio-proto = ""
+tokio-core = "0.1"
+tokio-proto = "0.1"
 tokio-service = "0.1"
+error-chain = "0.11"
+
+[profile.release]
+lto = true

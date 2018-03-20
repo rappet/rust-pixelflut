@@ -1,5 +1,5 @@
 use command::Command;
-use error::{Error, Result};
+use error::{Error, ErrorKind, Result};
 
 use std::str;
 
@@ -19,7 +19,7 @@ impl Decoder for PixelflutCodec {
 
             Ok(Some(str::from_utf8(&line)?.parse()?))
         } else if buf.len() > 34 { // longest possible command
-            Err(Error::LineTooLong)
+            Err(ErrorKind::LineTooLong.into())
         } else {
             Ok(None)
         }
@@ -46,10 +46,7 @@ mod tests {
         use tokio_io::codec::Decoder;
         use PixelflutCodec;
 
-        let pxcommand = Command::Px( Pixel::new(
-            Coordinate::new( 45, 67 ),
-            Color::rgb(0x11, 0x22, 0x55),
-        ) );
+        let pxcommand = Command::Px(Pixel::new((45, 67), (0x11, 0x22, 0x55)));
 
         let mut buf = BytesMut::from("PX 45 67 112255\n");
         assert_eq!(PixelflutCodec.decode(&mut buf).unwrap(), Some(pxcommand));
@@ -64,10 +61,7 @@ mod tests {
         use tokio_io::codec::Encoder;
         use PixelflutCodec;
 
-        let pxcommand = Command::Px( Pixel::new(
-            Coordinate::new( 45, 67 ),
-            Color::rgb(0x11, 0x22, 0x55),
-        ) );
+        let pxcommand = Command::Px(Pixel::new((45, 67), (0x11, 0x22, 0x55)));
 
         let mut buf = BytesMut::new();
         PixelflutCodec.encode(pxcommand, &mut buf).unwrap();

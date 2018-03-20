@@ -19,8 +19,8 @@
 use std::{fmt};
 use std::str::FromStr;
 
-use pixel::{Pixel, Coordinate};
-use error::{Error, Result};
+use pixel::{Pixel, Coordinate, Color};
+use error::{Error, ErrorKind, Result};
 
 /// A pixelflut command
 /// 
@@ -70,38 +70,44 @@ impl FromStr for Command {
     fn from_str(s: &str) -> Result<Command> {
         let mut iter = s.split_whitespace();
 
-        let command = iter.next().ok_or(Error::InvalidCommand)?;
+        let command = iter.next().ok_or(ErrorKind::InvalidCommand)?;
 
         let command = match command {
             "PX" => { Command::Px( Pixel::new(
                 Coordinate::new(
                     iter.next()
-                        .ok_or(Error::WrongNumberOfArguments)?.parse()?,
+                        .ok_or(ErrorKind::WrongNumberOfArguments)?.parse()?,
                     iter.next()
-                        .ok_or(Error::WrongNumberOfArguments)?.parse()?
+                        .ok_or(ErrorKind::WrongNumberOfArguments)?.parse()?
                 ),
-                iter.next().ok_or(Error::WrongNumberOfArguments)?.parse()?
+                iter.next().ok_or(ErrorKind::WrongNumberOfArguments)?.parse::<Color>()?
             ) ) },
             "SIZE" => {
                 if let Some(w) = iter.next() {
                     Command::SizeResponse {
                         w: w.parse()?,
                         h: iter.next()
-                            .ok_or(Error::WrongNumberOfArguments)?.parse()?,
+                            .ok_or(ErrorKind::WrongNumberOfArguments)?.parse()?,
                     }
                 } else {
                     Command::Size
                 }
             },
-            _ => return Err(Error::InvalidCommand),
+            _ => return Err(ErrorKind::InvalidCommand.into()),
         };
 
         if iter.next() == None {
             Ok(command)
         } else {
-            Err(Error::WrongNumberOfArguments)
+            Err(ErrorKind::WrongNumberOfArguments.into())
         }
 
+    }
+}
+
+impl From<Pixel> for Command {
+    fn from(pixel: Pixel) -> Command {
+        Command::Px(pixel)
     }
 }
 
@@ -112,10 +118,7 @@ mod test {
         use command::Command;
         use pixel::{Pixel, Coordinate, Color};
 
-        let pxcommand = Command::Px( Pixel::new(
-            Coordinate::new( 45, 67 ),
-            Color::rgb(0x11, 0x22, 0x55),
-        ) );
+        let pxcommand = Command::Px(Pixel::new((45, 67), (0x11, 0x22, 0x55)));
 
         assert_eq!( format!("{}", pxcommand), "PX 45 67 112255" );
         assert_eq!( pxcommand, "PX 45 67 112255".parse().unwrap() );

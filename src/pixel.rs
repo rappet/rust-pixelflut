@@ -1,7 +1,7 @@
 //! A module that contians pixels for pixelflut.
 use std::fmt;
 use std::str::FromStr;
-use error::{Error, Result};
+use error::{Error, ErrorKind, Result};
 
 /// pixelflut pixel
 #[derive(Copy, Clone, PartialEq, Hash, Debug)]
@@ -12,10 +12,10 @@ pub struct Pixel {
 
 impl Pixel {
     /// construct a new `Pixel` with a `Coordinate` and a `Color`
-    pub fn new(position: Coordinate, color: Color) -> Pixel {
+    pub fn new<P: Into<Coordinate>, C: Into<Color>>(position: P, color: C) -> Pixel {
         Pixel {
-            position: position,
-            color: color,
+            position: position.into(),
+            color: color.into(),
         }
     }
 }
@@ -33,13 +33,13 @@ impl FromStr for Pixel {
         let mut iter = s.split_whitespace();
         let pixel = Pixel::new(
             Coordinate::new(
-                iter.next().ok_or(Error::WrongNumberOfArguments)?.parse()?,
-                iter.next().ok_or(Error::WrongNumberOfArguments)?.parse()?
+                iter.next().ok_or(ErrorKind::WrongNumberOfArguments)?.parse()?,
+                iter.next().ok_or(ErrorKind::WrongNumberOfArguments)?.parse()?
             ),
-            iter.next().ok_or(Error::WrongNumberOfArguments)?.parse()?
+            iter.next().ok_or(ErrorKind::WrongNumberOfArguments)?.parse::<Color>()?
         );
         if iter.next().is_some() {
-            Err(Error::WrongNumberOfArguments)
+            Err(ErrorKind::WrongNumberOfArguments.into())
         } else {
             Ok(pixel)
         }
@@ -63,6 +63,18 @@ impl Coordinate {
     }
 }
 
+impl From<(u32, u32)> for Coordinate {
+    fn from(coordinate: (u32, u32)) -> Coordinate {
+        Coordinate::new(coordinate.0, coordinate.1)
+    }
+}
+
+impl Into<(u32, u32)> for Coordinate {
+    fn into(self) -> (u32, u32) {
+        (self.x, self.y)
+    }
+}
+
 impl fmt::Display for Coordinate {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{} {}", self.x, self.y)
@@ -78,6 +90,7 @@ pub struct Color {
 }
 
 impl Color {
+    
     /// Constructs a new `Color` without using an alpha channel.
     ///
     /// # Examples
@@ -134,6 +147,36 @@ impl Color {
     }
 }
 
+impl From<(u8, u8, u8)> for Color {
+    /// Returns a RGB Color
+    fn from(color: (u8, u8, u8)) -> Color {
+        Color::rgb(color.0, color.1, color.2)
+    }
+}
+
+
+impl From<(u8, u8, u8, u8)> for Color {
+    /// Returns a RGBA Color
+    fn from(color: (u8, u8, u8, u8)) -> Color {
+        Color::rgba(color.0, color.1, color.2, color.3)
+    }
+}
+
+impl Into<(u8, u8, u8)> for Color {
+    fn into(self) -> (u8, u8, u8) {
+        (self.r, self.g, self.b)
+    }
+}
+
+impl Into<(u8, u8, u8, u8)> for Color {
+    fn into(self) -> (u8, u8, u8, u8) {
+        match self.a {
+            Some(a) => (self.r, self.g, self.b, a),
+            None => (self.r, self.g, self.b, 255),
+        }
+    }
+}
+
 impl FromStr for Color {
     type Err = Error;
 
@@ -150,7 +193,7 @@ impl FromStr for Color {
                 u8::from_str_radix(&s[4..6], 16)?,
                 u8::from_str_radix(&s[6..8], 16)?,
             )),
-            _ => Err(Error::ColorLength)
+            _ => Err(ErrorKind::ColorLength.into())
 
         }
     }
@@ -210,9 +253,9 @@ mod tests {
     fn test_color_from_str() {
         assert_eq!(Color::rgb(0x11, 0x22, 0x33), "112233".parse().unwrap());
         assert_eq!(Color::rgba(0x11, 0x22, 0x33, 0xee), "112233ee".parse().unwrap());
-        assert_eq!(Error::ColorLength, "".parse::<Color>().unwrap_err());
-        assert_eq!(Error::ColorLength, "123".parse::<Color>().unwrap_err());
-        assert_eq!(Error::ColorLength, "12345".parse::<Color>().unwrap_err());
+        assert_eq!(ErrorKind::ColorLength.into(), "".parse::<Color>().unwrap_err());
+        assert_eq!(ErrorKind::ColorLength.into(), "123".parse::<Color>().unwrap_err());
+        assert_eq!(ErrorKind::ColorLength.into(), "12345".parse::<Color>().unwrap_err());
         assert!(" 1 2 3".parse::<Color>().is_err()); // Could be better
         assert!("112g33".parse::<Color>().is_err()); // Could be better
     }
