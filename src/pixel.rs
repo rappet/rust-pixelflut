@@ -219,7 +219,6 @@ mod tests {
     use Pixel;
     use Coordinate;
     use Color;
-    use error::Error;
 
     #[test]
     fn test_pixel_from_str() {
@@ -253,10 +252,10 @@ mod tests {
     fn test_color_from_str() {
         assert_eq!(Color::rgb(0x11, 0x22, 0x33), "112233".parse().unwrap());
         assert_eq!(Color::rgba(0x11, 0x22, 0x33, 0xee), "112233ee".parse().unwrap());
-        assert_eq!(ErrorKind::ColorLength.into(), "".parse::<Color>().unwrap_err());
-        assert_eq!(ErrorKind::ColorLength.into(), "123".parse::<Color>().unwrap_err());
-        assert_eq!(ErrorKind::ColorLength.into(), "12345".parse::<Color>().unwrap_err());
-        assert!(" 1 2 3".parse::<Color>().is_err()); // Could be better
-        assert!("112g33".parse::<Color>().is_err()); // Could be better
+        assert!("".parse::<Color>().is_err());
+        assert!("123".parse::<Color>().is_err());
+        assert!("12345".parse::<Color>().is_err());
+        assert!(" 1 2 3".parse::<Color>().is_err());
+        assert!("112g33".parse::<Color>().is_err());
     }
 }

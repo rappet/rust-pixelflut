@@ -116,7 +116,7 @@ mod test {
     #[test]
     fn display() {
         use command::Command;
-        use pixel::{Pixel, Coordinate, Color};
+        use pixel::Pixel;
 
         let pxcommand = Command::Px(Pixel::new((45, 67), (0x11, 0x22, 0x55)));
 

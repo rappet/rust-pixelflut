@@ -3,12 +3,10 @@ extern crate tokio_core;
 extern crate pixelflut;
 
 use std::net::ToSocketAddrs;
-use std::str::FromStr;
 use tokio_core::reactor::Core;
 use futures::future::Future;
 use futures::Sink;
 use futures::Stream;
-use futures::stream;
 
 use pixelflut::Client;
 use pixelflut::Command;
@@ -28,7 +26,7 @@ fn main() {
                 Command::Px(Pixel::new(
                         Coordinate::new(12, 34), 
                         Color::rgb(12, 34, 56)))
-            ).and_then(|pf| {
+                ).and_then(|pf| {
                 pf.for_each(|command| {
                     println!("{:?}", command);
                     Ok(())

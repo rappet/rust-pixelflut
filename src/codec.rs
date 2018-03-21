@@ -41,7 +41,7 @@ mod tests {
     #[test]
     fn decode() {
         use bytes::BytesMut;
-        use pixel::{Coordinate, Color, Pixel};
+        use pixel::Pixel;
         use command::Command;
         use tokio_io::codec::Decoder;
         use PixelflutCodec;
@@ -56,7 +56,7 @@ mod tests {
     #[test]
     fn encode() {
         use bytes::BytesMut;
-        use pixel::{Coordinate, Color, Pixel};
+        use pixel::Pixel;
         use command::Command;
         use tokio_io::codec::Encoder;
         use PixelflutCodec;
