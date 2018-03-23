@@ -1,6 +1,6 @@
-use command::Command;
-use codec::PixelflutCodec;
-use error::{Error, ErrorKind};
+use command::{ClientCommand, ServerCommand};
+use codec::PixelflutClientCodec;
+use error::Error;
 
 use futures::{Async, Future, Poll, Sink, StartSend, Stream};
 
@@ -36,7 +36,7 @@ impl Future for ClientConnectFuture {
     type Error = Error;
 
     fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
-        let framed = try_ready!(self.inner.poll()).framed(PixelflutCodec);
+        let framed = try_ready!(self.inner.poll()).framed(PixelflutClientCodec);
         let pixelflut_transport = PixelflutClientTransport::new(framed);
 
         Ok(Async::Ready(pixelflut_transport))
@@ -45,16 +45,16 @@ impl Future for ClientConnectFuture {
 
 pub struct PixelflutClientTransport<T>
 where
-    T: AsyncRead + AsyncWrite
+T: AsyncRead + AsyncWrite
 {
-    inner: Framed<T, PixelflutCodec>,
+    inner: Framed<T, PixelflutClientCodec>,
 }
 
 impl<T> PixelflutClientTransport<T>
 where
-    T: AsyncRead + AsyncWrite,
+T: AsyncRead + AsyncWrite,
 {
-    fn new(inner: Framed<T, PixelflutCodec>) -> PixelflutClientTransport<T> {
+    fn new(inner: Framed<T, PixelflutClientCodec>) -> PixelflutClientTransport<T> {
         PixelflutClientTransport {
             inner: inner,
         }
@@ -63,38 +63,30 @@ where
 
 impl<T> Stream for PixelflutClientTransport<T>
 where
-    T: AsyncRead + AsyncWrite,
+T: AsyncRead + AsyncWrite,
 {
-    type Item = Command;
+    type Item = ClientCommand;
     type Error = Error;
 
     fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
         let command = try_ready!(self.inner.poll());
         if let Some(command) = command {
-            if command.is_clientbound() {
-                Ok(Async::Ready(Some(command)))
-            } else {
-                Err(ErrorKind::InvalidCommand.into())
-            }
+            Ok(Async::Ready(Some(command)))
         } else {
-            Ok(Async::Ready(command))
+            Ok(Async::NotReady)
         }
     }
 }
 
 impl<T> Sink for PixelflutClientTransport<T>
 where
-    T: AsyncRead + AsyncWrite,
+T: AsyncRead + AsyncWrite,
 {
-    type SinkItem = Command;
+    type SinkItem = ServerCommand;
     type SinkError = Error;
 
     fn start_send(&mut self, item: Self::SinkItem) -> StartSend<Self::SinkItem, Self::SinkError> {
-        if item.is_serverbound() {
-            Ok(self.inner.start_send(item)?)
-        } else {
-            Err(ErrorKind::InvalidCommand.into())
-        }
+        Ok(self.inner.start_send(item)?)
     }
 
     fn poll_complete(&mut self) -> Poll<(), Self::SinkError> {

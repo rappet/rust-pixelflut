@@ -24,56 +24,32 @@ use error::{Error, ErrorKind, Result};
 
 /// A pixelflut command
 /// 
-/// could be client- or serverbound.
-/// Check with `is_clientbound` or `is_serverbound`.
+/// Send to the Server
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub enum Command {
+pub enum ServerCommand {
     Px(Pixel),
     Size,
-    SizeResponse { w: u32, h: u32 },
 }
 
-impl Command {
-    /// Check if command can be send to client.
-    pub fn is_clientbound(&self) -> bool {
-        match self {
-            &Command::Px (_) => false,
-            &Command::Size => false,
-            &Command::SizeResponse { .. } => true,
-        }
-    }
-
-    /// Chekc if command can be send to server.
-    pub fn is_serverbound(&self) -> bool {
-        match self {
-            &Command::Px(_) => true,
-            &Command::Size => true,
-            &Command::SizeResponse { .. } => false,
-        }
-    }
-}
-
-impl fmt::Display for Command {
+impl fmt::Display for ServerCommand {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Command::Px ( ref pixel ) => write!(f, "PX {}", pixel),
-            Command::Size => write!(f, "SIZE"),
-            Command::SizeResponse { w, h } =>
-                write!(f, "SIZE {} {}", w, h),
+            ServerCommand::Px ( ref pixel ) => write!(f, "PX {}", pixel),
+            ServerCommand::Size => write!(f, "SIZE"),
         }
     }
 }
 
-impl FromStr for Command {
+impl FromStr for ServerCommand {
     type Err = Error;
 
-    fn from_str(s: &str) -> Result<Command> {
+    fn from_str(s: &str) -> Result<ServerCommand> {
         let mut iter = s.split_whitespace();
 
         let command = iter.next().ok_or(ErrorKind::InvalidCommand)?;
 
         let command = match command {
-            "PX" => { Command::Px( Pixel::new(
+            "PX" => { ServerCommand::Px( Pixel::new(
                 Coordinate::new(
                     iter.next()
                         .ok_or(ErrorKind::WrongNumberOfArguments)?.parse()?,
@@ -83,14 +59,10 @@ impl FromStr for Command {
                 iter.next().ok_or(ErrorKind::WrongNumberOfArguments)?.parse::<Color>()?
             ) ) },
             "SIZE" => {
-                if let Some(w) = iter.next() {
-                    Command::SizeResponse {
-                        w: w.parse()?,
-                        h: iter.next()
-                            .ok_or(ErrorKind::WrongNumberOfArguments)?.parse()?,
-                    }
+                if let Some(_) = iter.next() {
+                    return Err(ErrorKind::WrongNumberOfArguments.into())
                 } else {
-                    Command::Size
+                    ServerCommand::Size
                 }
             },
             _ => return Err(ErrorKind::InvalidCommand.into()),
@@ -105,9 +77,64 @@ impl FromStr for Command {
     }
 }
 
-impl From<Pixel> for Command {
-    fn from(pixel: Pixel) -> Command {
-        Command::Px(pixel)
+impl From<Pixel> for ServerCommand {
+    fn from(pixel: Pixel) -> ServerCommand {
+        ServerCommand::Px(pixel)
+    }
+}
+
+///
+///
+///
+///
+///
+
+/// A pixelflut command
+/// 
+/// Send to the Client
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum ClientCommand {
+    SizeResponse { w: u32, h: u32 },
+}
+
+impl fmt::Display for ClientCommand {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            ClientCommand::SizeResponse { w, h } =>
+                write!(f, "SIZE {} {}", w, h),
+        }
+    }
+}
+
+impl FromStr for ClientCommand {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<ClientCommand> {
+        let mut iter = s.split_whitespace();
+
+        let command = iter.next().ok_or(ErrorKind::InvalidCommand)?;
+
+        let command = match command {
+            "SIZE" => {
+                if let Some(w) = iter.next() {
+                    ClientCommand::SizeResponse {
+                        w: w.parse()?,
+                        h: iter.next()
+                            .ok_or(ErrorKind::WrongNumberOfArguments)?.parse()?,
+                    }
+                } else {
+                    return Err(ErrorKind::WrongNumberOfArguments.into())
+                }
+            },
+            _ => return Err(ErrorKind::InvalidCommand.into()),
+        };
+
+        if iter.next() == None {
+            Ok(command)
+        } else {
+            Err(ErrorKind::WrongNumberOfArguments.into())
+        }
+
     }
 }
 
@@ -115,40 +142,26 @@ impl From<Pixel> for Command {
 mod test {
     #[test]
     fn display() {
-        use command::Command;
+        use command::{ServerCommand, ClientCommand};
         use pixel::Pixel;
 
-        let pxcommand = Command::Px(Pixel::new((45, 67), (0x11, 0x22, 0x55)));
+        let pxcommand = ServerCommand::Px(Pixel::new((45, 67), (0x11, 0x22, 0x55)));
 
         assert_eq!( format!("{}", pxcommand), "PX 45 67 112255" );
         assert_eq!( pxcommand, "PX 45 67 112255".parse().unwrap() );
-        assert_eq!( format!("{}", Command::Size), "SIZE" );
-        assert_eq!( Command::Size, "SIZE".parse().unwrap() );
+        assert_eq!( format!("{}", ServerCommand::Size), "SIZE" );
+        assert_eq!( ServerCommand::Size, "SIZE".parse().unwrap() );
         assert_eq!(
-            format!("{}", Command::SizeResponse { w: 12, h: 34 } ),
+            format!("{}", ClientCommand::SizeResponse { w: 12, h: 34 } ),
             "SIZE 12 34"
         );
         assert_eq!(
-            Command::SizeResponse { w: 12, h: 34 },
+            ClientCommand::SizeResponse { w: 12, h: 34 },
             "SIZE 12 34".parse().unwrap()
         );
-        assert!( "SIZE Blah".parse::<Command>().is_err() );
-        assert!( "FOO".parse::<Command>().is_err() );
+        assert!( "SIZE Blah".parse::<ClientCommand>().is_err() );
+        assert!( "FOO".parse::<ServerCommand>().is_err() );
+        assert!( "FOO".parse::<ClientCommand>().is_err() );
     }
 
-    #[test]
-    fn is_clientbound() {
-        use command::Command;
-        assert!( !"PX 12 34 112233".parse::<Command>().unwrap().is_clientbound() );
-        assert!( !"SIZE".parse::<Command>().unwrap().is_clientbound() );
-        assert!( "SIZE 12 34".parse::<Command>().unwrap().is_clientbound() );
-    }
-
-    #[test]
-    fn is_serverbound() {
-        use command::Command;
-        assert!( "PX 12 34 112233".parse::<Command>().unwrap().is_serverbound() );
-        assert!( "SIZE".parse::<Command>().unwrap().is_serverbound() );
-        assert!( !"SIZE 12 34".parse::<Command>().unwrap().is_serverbound() );
-    }
 }
