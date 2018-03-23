@@ -56,10 +56,7 @@ pub struct Coordinate {
 impl Coordinate {
     /// Constructs a new `Coordinate` with given x and y position.
     pub fn new(x: u32, y: u32) -> Coordinate {
-        Coordinate {
-            x,
-            y,
-        }
+        Coordinate { x, y }
     }
 }
 
@@ -103,10 +100,7 @@ impl Color {
     /// ```
     pub fn rgb(r: u8, g: u8, b: u8) -> Color {
         Color {
-            r,
-            g,
-            b,
-            a: None,
+            r, g, b, a: None
         }
     }
 
@@ -122,10 +116,7 @@ impl Color {
     /// ```
     pub fn rgba(r: u8, g: u8, b: u8, a: u8) -> Color {
         Color {
-            r: r,
-            g: g,
-            b: b,
-            a: Some(a),
+            r, g, b, a: Some(a)
         }
     }
 

@@ -55,9 +55,7 @@ where
 T: AsyncRead + AsyncWrite,
 {
     fn new(inner: Framed<T, PixelflutClientCodec>) -> PixelflutClientTransport<T> {
-        PixelflutClientTransport {
-            inner: inner,
-        }
+        PixelflutClientTransport { inner }
     }
 }
 

@@ -59,7 +59,7 @@ impl FromStr for ServerCommand {
                 iter.next().ok_or(ErrorKind::WrongNumberOfArguments)?.parse::<Color>()?
             ) ) },
             "SIZE" => {
-                if let Some(_) = iter.next() {
+                if iter.next().is_some() {
                     return Err(ErrorKind::WrongNumberOfArguments.into())
                 } else {
                     ServerCommand::Size
