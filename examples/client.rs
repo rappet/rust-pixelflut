@@ -23,11 +23,11 @@ fn run() -> error::Result<()> {
     let handle = ev.handle();
 
     let addr = env::args()
-        .skip(1).next()
-        .unwrap_or(String::from("127.0.0.1:12345"))
+        .nth(1)
+        .unwrap_or_else(|| String::from("127.0.0.1:12345"))
         .to_socket_addrs()?
         .next()
-        .ok_or(error::Error::from("Could not convert to SocketAddr"))?;
+        .ok_or_else(|| error::Error::from("Could not convert to SocketAddr"))?;
 
     let client = Client::new(addr)
         .connect(&handle)

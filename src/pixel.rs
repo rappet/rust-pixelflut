@@ -57,8 +57,8 @@ impl Coordinate {
     /// Constructs a new `Coordinate` with given x and y position.
     pub fn new(x: u32, y: u32) -> Coordinate {
         Coordinate {
-            x: x,
-            y: y,
+            x,
+            y,
         }
     }
 }
@@ -103,9 +103,9 @@ impl Color {
     /// ```
     pub fn rgb(r: u8, g: u8, b: u8) -> Color {
         Color {
-            r: r,
-            g: g,
-            b: b,
+            r,
+            g,
+            b,
             a: None,
         }
     }
