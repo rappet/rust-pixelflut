@@ -5,6 +5,10 @@
 
 rust-pixelflut is going to be a pixelflut library for rust.
 
+## TODO:
+* Types and formating are usable, but should be enhanced.
+* Networking needs some work.
+
 
 ## License
 
