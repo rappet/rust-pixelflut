@@ -1,4 +1,4 @@
-use command::{ClientCommand, ServerCommand};
+use command::{Response, Command};
 use codec::PixelflutClientCodec;
 use error::Error;
 
@@ -63,7 +63,7 @@ impl<T> Stream for PixelflutClientTransport<T>
 where
 T: AsyncRead + AsyncWrite,
 {
-    type Item = ClientCommand;
+    type Item = Response;
     type Error = Error;
 
     fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
@@ -80,7 +80,7 @@ impl<T> Sink for PixelflutClientTransport<T>
 where
 T: AsyncRead + AsyncWrite,
 {
-    type SinkItem = ServerCommand;
+    type SinkItem = Command;
     type SinkError = Error;
 
     fn start_send(&mut self, item: Self::SinkItem) -> StartSend<Self::SinkItem, Self::SinkError> {

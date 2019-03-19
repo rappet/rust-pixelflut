@@ -6,8 +6,8 @@ use error::{Error, ErrorKind, Result};
 /// pixelflut pixel
 #[derive(Copy, Clone, PartialEq, Hash, Debug)]
 pub struct Pixel {
-    position: Coordinate,
-    color: Color,
+    pub position: Coordinate,
+    pub color: Color,
 }
 
 impl Pixel {
@@ -49,8 +49,8 @@ impl FromStr for Pixel {
 /// coordinate on a pixelflut grid
 #[derive(Copy, Clone, PartialEq, Hash, Debug)]
 pub struct Coordinate {
-    x: u32,
-    y: u32,
+    pub x: u32,
+    pub y: u32,
 }
 
 impl Coordinate {

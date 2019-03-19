@@ -1,4 +1,4 @@
-use command::{ServerCommand, ClientCommand};
+use command::{Command, Response};
 use error::{Error, ErrorKind, Result};
 
 use std::str;
@@ -9,10 +9,10 @@ use tokio_io::codec::{Decoder, Encoder};
 pub struct PixelflutServerCodec;
 
 impl Decoder for PixelflutServerCodec {
-    type Item = ServerCommand;
+    type Item = Command;
     type Error = Error;
 
-    fn decode(&mut self, buf: &mut BytesMut) -> Result<Option<ServerCommand>> {
+    fn decode(&mut self, buf: &mut BytesMut) -> Result<Option<Command>> {
         if let Some(i) = buf.iter().position(|&b| b == b'\n') {
             let line = buf.split_to(i);
             buf.split_to(1);
@@ -27,10 +27,10 @@ impl Decoder for PixelflutServerCodec {
 }
 
 impl Encoder for PixelflutServerCodec {
-    type Item = ClientCommand;
+    type Item = Response;
     type Error = Error;
 
-    fn encode(&mut self, command: ClientCommand, buf: &mut BytesMut) -> Result<()> {
+    fn encode(&mut self, command: Response, buf: &mut BytesMut) -> Result<()> {
         buf.extend(format!("{}\n", command).as_bytes());
         Ok(())
     }
@@ -39,10 +39,10 @@ impl Encoder for PixelflutServerCodec {
 pub struct PixelflutClientCodec;
 
 impl Decoder for PixelflutClientCodec {
-    type Item = ClientCommand;
+    type Item = Response;
     type Error = Error;
 
-    fn decode(&mut self, buf: &mut BytesMut) -> Result<Option<ClientCommand>> {
+    fn decode(&mut self, buf: &mut BytesMut) -> Result<Option<Response>> {
         if let Some(i) = buf.iter().position(|&b| b == b'\n') {
             let line = buf.split_to(i);
             buf.split_to(1);
@@ -57,10 +57,10 @@ impl Decoder for PixelflutClientCodec {
 }
 
 impl Encoder for PixelflutClientCodec {
-    type Item = ServerCommand;
+    type Item = Command;
     type Error = Error;
 
-    fn encode(&mut self, command: ServerCommand, buf: &mut BytesMut) -> Result<()> {
+    fn encode(&mut self, command: Command, buf: &mut BytesMut) -> Result<()> {
         buf.extend(format!("{}\n", command).as_bytes());
         Ok(())
     }
@@ -73,11 +73,11 @@ mod tests {
 
     #[test]
     fn decode_server() {
-        use command::ServerCommand;
+        use command::Command;
         use tokio_io::codec::Decoder;
         use PixelflutServerCodec;
 
-        let pxcommand = ServerCommand::Px(Pixel::new((45, 67), (0x11, 0x22, 0x55)));
+        let pxcommand = Command::Px(Pixel::new((45, 67), (0x11, 0x22, 0x55)));
 
         let mut buf = BytesMut::from("PX 45 67 112255\n");
         assert_eq!(PixelflutServerCodec.decode(&mut buf).unwrap(), Some(pxcommand));
@@ -86,11 +86,11 @@ mod tests {
 
     #[test]
     fn encode_server() {
-        use command::ServerCommand;
+        use command::Command;
         use tokio_io::codec::Encoder;
         use PixelflutClientCodec;
 
-        let pxcommand = ServerCommand::Px(Pixel::new((45, 67), (0x11, 0x22, 0x55)));
+        let pxcommand = Command::Px(Pixel::new((45, 67), (0x11, 0x22, 0x55)));
 
         let mut buf = BytesMut::new();
         PixelflutClientCodec.encode(pxcommand, &mut buf).unwrap();
@@ -100,11 +100,11 @@ mod tests {
 
     #[test]
     fn decode_client() {
-        use command::ClientCommand;
+        use command::Response;
         use tokio_io::codec::Decoder;
         use PixelflutClientCodec;
 
-        let sizecommand = ClientCommand::SizeResponse { w: 12, h: 34 };
+        let sizecommand = Response::Size { w: 12, h: 34 };
 
         let mut buf = BytesMut::from("SIZE 12 34\n");
         assert_eq!(PixelflutClientCodec.decode(&mut buf).unwrap(), Some(sizecommand));
@@ -113,11 +113,11 @@ mod tests {
 
     #[test]
     fn encode_client() {
-        use command::ClientCommand;
+        use command::Response;
         use tokio_io::codec::Encoder;
         use PixelflutServerCodec;
 
-        let sizecommand = ClientCommand::SizeResponse { w: 12, h: 34 };
+        let sizecommand = Response::Size { w: 12, h: 34 };
 
         let mut buf = BytesMut::new();
         PixelflutServerCodec.encode(sizecommand, &mut buf).unwrap();

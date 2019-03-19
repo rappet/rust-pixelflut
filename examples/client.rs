@@ -12,7 +12,7 @@ use futures::Sink;
 use futures::Stream;
 
 use pixelflut::Client;
-use pixelflut::ServerCommand;
+use pixelflut::Command;
 use pixelflut::pixel::{Pixel, Coordinate, Color};
 use pixelflut::error;
 
@@ -33,7 +33,7 @@ fn run() -> error::Result<()> {
         .connect(&handle)
         .and_then(|pf| {
             pf.send(
-                ServerCommand::Px(Pixel::new(
+                Command::Px(Pixel::new(
                         Coordinate::new(12, 34), 
                         Color::rgb(12, 34, 56)))
                 ).and_then(|pf| {

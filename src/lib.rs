@@ -14,6 +14,6 @@ pub mod client;
 
 pub use error::Error;
 pub use pixel::{Pixel, Color, Coordinate};
-pub use command::{ClientCommand, ServerCommand};
+pub use command::{Command, Response};
 pub use codec::{PixelflutClientCodec, PixelflutServerCodec};
 pub use client::Client;

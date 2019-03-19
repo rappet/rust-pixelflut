@@ -26,30 +26,30 @@ use error::{Error, ErrorKind, Result};
 /// 
 /// Send to the Server
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub enum ServerCommand {
+pub enum Command {
     Px(Pixel),
     Size,
 }
 
-impl fmt::Display for ServerCommand {
+impl fmt::Display for Command {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            ServerCommand::Px ( ref pixel ) => write!(f, "PX {}", pixel),
-            ServerCommand::Size => write!(f, "SIZE"),
+            Command::Px ( ref pixel ) => write!(f, "PX {}", pixel),
+            Command::Size => write!(f, "SIZE"),
         }
     }
 }
 
-impl FromStr for ServerCommand {
+impl FromStr for Command {
     type Err = Error;
 
-    fn from_str(s: &str) -> Result<ServerCommand> {
+    fn from_str(s: &str) -> Result<Command> {
         let mut iter = s.split_whitespace();
 
         let command = iter.next().ok_or(ErrorKind::InvalidCommand)?;
 
         let command = match command {
-            "PX" => { ServerCommand::Px( Pixel::new(
+            "PX" => { Command::Px( Pixel::new(
                 Coordinate::new(
                     iter.next()
                         .ok_or(ErrorKind::WrongNumberOfArguments)?.parse()?,
@@ -62,7 +62,7 @@ impl FromStr for ServerCommand {
                 if iter.next().is_some() {
                     return Err(ErrorKind::WrongNumberOfArguments.into())
                 } else {
-                    ServerCommand::Size
+                    Command::Size
                 }
             },
             _ => return Err(ErrorKind::InvalidCommand.into()),
@@ -77,9 +77,9 @@ impl FromStr for ServerCommand {
     }
 }
 
-impl From<Pixel> for ServerCommand {
-    fn from(pixel: Pixel) -> ServerCommand {
-        ServerCommand::Px(pixel)
+impl From<Pixel> for Command {
+    fn from(pixel: Pixel) -> Command {
+        Command::Px(pixel)
     }
 }
 
@@ -93,23 +93,23 @@ impl From<Pixel> for ServerCommand {
 /// 
 /// Send to the Client
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub enum ClientCommand {
-    SizeResponse { w: u32, h: u32 },
+pub enum Response {
+    Size { w: u32, h: u32 },
 }
 
-impl fmt::Display for ClientCommand {
+impl fmt::Display for Response {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            ClientCommand::SizeResponse { w, h } =>
+            Response::Size { w, h } =>
                 write!(f, "SIZE {} {}", w, h),
         }
     }
 }
 
-impl FromStr for ClientCommand {
+impl FromStr for Response {
     type Err = Error;
 
-    fn from_str(s: &str) -> Result<ClientCommand> {
+    fn from_str(s: &str) -> Result<Response> {
         let mut iter = s.split_whitespace();
 
         let command = iter.next().ok_or(ErrorKind::InvalidCommand)?;
@@ -117,7 +117,7 @@ impl FromStr for ClientCommand {
         let command = match command {
             "SIZE" => {
                 if let Some(w) = iter.next() {
-                    ClientCommand::SizeResponse {
+                    Response::Size {
                         w: w.parse()?,
                         h: iter.next()
                             .ok_or(ErrorKind::WrongNumberOfArguments)?.parse()?,
@@ -142,26 +142,26 @@ impl FromStr for ClientCommand {
 mod test {
     #[test]
     fn display() {
-        use command::{ServerCommand, ClientCommand};
+        use command::{Command, Response};
         use pixel::Pixel;
 
-        let pxcommand = ServerCommand::Px(Pixel::new((45, 67), (0x11, 0x22, 0x55)));
+        let pxcommand = Command::Px(Pixel::new((45, 67), (0x11, 0x22, 0x55)));
 
         assert_eq!( format!("{}", pxcommand), "PX 45 67 112255" );
         assert_eq!( pxcommand, "PX 45 67 112255".parse().unwrap() );
-        assert_eq!( format!("{}", ServerCommand::Size), "SIZE" );
-        assert_eq!( ServerCommand::Size, "SIZE".parse().unwrap() );
+        assert_eq!( format!("{}", Command::Size), "SIZE" );
+        assert_eq!( Command::Size, "SIZE".parse().unwrap() );
         assert_eq!(
-            format!("{}", ClientCommand::SizeResponse { w: 12, h: 34 } ),
+            format!("{}", Response::Size { w: 12, h: 34 } ),
             "SIZE 12 34"
         );
         assert_eq!(
-            ClientCommand::SizeResponse { w: 12, h: 34 },
+            Response::Size { w: 12, h: 34 },
             "SIZE 12 34".parse().unwrap()
         );
-        assert!( "SIZE Blah".parse::<ClientCommand>().is_err() );
-        assert!( "FOO".parse::<ServerCommand>().is_err() );
-        assert!( "FOO".parse::<ClientCommand>().is_err() );
+        assert!( "SIZE Blah".parse::<Response>().is_err() );
+        assert!( "FOO".parse::<Response>().is_err() );
+        assert!( "FOO".parse::<Response>().is_err() );
     }
 
 }
