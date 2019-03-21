@@ -8,7 +8,7 @@ rust-pixelflut is going to be a pixelflut library for rust.
 ## TODO:
 - [ ] Types and formating are usable, but should be enhanced.
 - [X] sync client
-- [ ] sync server
+- [x] sync server
 - [ ] async client
 - [ ] async server
 
