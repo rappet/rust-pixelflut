@@ -130,7 +130,7 @@ impl Color {
     /// use pixelflut::Color;
     /// assert_eq!((255, 0, 0, 255), Color::rgb(255, 0, 0).normalized())
     /// ```
-    pub fn normalized(&self) -> (u8, u8, u8, u8) {
+    pub fn normalized(self) -> (u8, u8, u8, u8) {
         match self.a {
             Some(a) => (self.r, self.g, self.b, a),
             None    => (self.r, self.g, self.b, 255),
