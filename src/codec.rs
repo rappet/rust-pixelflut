@@ -19,7 +19,7 @@ impl Decoder for PixelflutServerCodec {
 
             Ok(Some(str::from_utf8(&line)?.parse()?))
         } else if buf.len() > 34 { // longest possible command
-            Err(ErrorKind::LineTooLong.into())
+            Err(ErrorKind::Parse.with_description("line is too long"))
         } else {
             Ok(None)
         }
@@ -49,7 +49,7 @@ impl Decoder for PixelflutClientCodec {
 
             Ok(Some(str::from_utf8(&line)?.parse()?))
         } else if buf.len() > 34 { // longest possible command
-            Err(ErrorKind::LineTooLong.into())
+            Err(ErrorKind::Parse.with_description("line is too long"))
         } else {
             Ok(None)
         }

@@ -3,8 +3,6 @@ extern crate futures;
 extern crate tokio_io;
 extern crate tokio_codec;
 extern crate tokio_core;
-#[macro_use]
-extern crate error_chain;
 
 pub mod error;
 pub mod pixel;

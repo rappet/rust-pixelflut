@@ -184,7 +184,7 @@ impl FromStr for Color {
                 u8::from_str_radix(&s[4..6], 16)?,
                 u8::from_str_radix(&s[6..8], 16)?,
             )),
-            _ => Err(ErrorKind::ColorLength.into())
+            _ => Err(ErrorKind::Parse.with_description("color length is wrong"))
 
         }
     }
