@@ -10,6 +10,7 @@ pub mod error;
 pub mod pixel;
 pub mod command;
 pub mod codec;
+pub mod sync;
 
 pub use error::Error;
 pub use pixel::{Pixel, Color, Coordinate};
