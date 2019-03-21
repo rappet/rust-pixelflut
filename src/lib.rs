@@ -10,7 +10,7 @@ pub mod command;
 pub mod codec;
 pub mod sync;
 
-pub use error::Error;
+pub use error::{Error, Result};
 pub use pixel::{Pixel, Color, Coordinate};
 pub use command::{Command, Response};
 pub use codec::{PixelflutClientCodec, PixelflutServerCodec};
