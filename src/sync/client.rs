@@ -4,7 +4,7 @@ use std::io::{self, Write, BufRead, BufReader};
 
 use command::{Command, Response};
 use pixel::Pixel;
-use error::{Result};
+use error::Result;
 
 /// a Pixelflut Client connection
 pub struct Client {
@@ -26,8 +26,9 @@ impl Client {
         self.stream.write_fmt(format_args!("{}\n", Command::Size))?;
         let mut reader = BufReader::new(&mut self.stream);
         let mut line = String::new();
-        if reader.read_line(&mut line)? > 0 {
-            let response: Response = line[0..line.len()-1].parse()?;
+        let n = reader.read_line(&mut line)?;
+        if n > 0 {
+            let response: Response = line[0..n-1].parse()?;
             match response {
                 Response::Size { w, h } => Ok((w, h)),
             }
