@@ -12,7 +12,17 @@ homepage = "https://github.com/rappet/rust-pixelflut"
 repository = "https://github.com/rappet/rust-pixelflut"
 
 [features]
-async = ["bytes", "futures", "tokio-io", "tokio-codec", "tokio-core"]
+async = ["bytes", "futures", "tokio", "tokio-io", "tokio-codec", "tokio-core"]
+
+[[example]]
+name = "sync_client"
+
+[[example]]
+name = "sync_server"
+
+[[example]]
+name = "async_server"
+required-features = ["async"]
 
 [dependencies]
 bytes = { version = "0.4", optional = true }
