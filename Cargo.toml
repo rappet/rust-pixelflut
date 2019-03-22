@@ -10,6 +10,7 @@ simple async protocol interface using tokio.
 """
 homepage = "https://github.com/rappet/rust-pixelflut"
 repository = "https://github.com/rappet/rust-pixelflut"
+keywords = ["pixelflut"]
 
 [features]
 async = ["bytes", "futures", "tokio-io", "tokio-codec", "tokio-core"]
