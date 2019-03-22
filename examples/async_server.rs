@@ -4,7 +4,7 @@ extern crate tokio;
 //extern crate tokio_io;
 extern crate tokio_codec;
 
-use pixelflut::codec::PixelflutServerCodec;
+use pixelflut::async::PixelflutServerCodec;
 
 use tokio_codec::Decoder;
 use tokio::net::{TcpListener, TcpStream};
