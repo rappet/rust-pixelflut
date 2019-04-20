@@ -266,7 +266,7 @@ dependencies = [
 
 [[package]]
 name = "pixelflut"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "bufstream 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "bytes 0.4.12 (registry+https://github.com/rust-lang/crates.io-index)",
