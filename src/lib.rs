@@ -1,3 +1,5 @@
+#[cfg(feature = "sync")]
+extern crate bufstream;
 #[cfg(feature = "async")]
 extern crate bytes;
 #[cfg(feature = "async")]
@@ -12,6 +14,7 @@ extern crate tokio_core;
 pub mod error;
 pub mod pixel;
 pub mod command;
+#[cfg(feature = "sync")]
 pub mod sync;
 #[cfg(feature = "async")]
 pub mod async;
