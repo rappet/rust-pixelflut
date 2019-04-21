@@ -1,7 +1,6 @@
 extern crate pixelflut;
 extern crate futures;
 extern crate tokio;
-//extern crate tokio_io;
 extern crate tokio_codec;
 
 use pixelflut::async::PixelflutServerCodec;
@@ -28,6 +27,7 @@ fn main() -> Result<(), Box<Error>> {
                 Ok(())
             })
     });
+    
     Ok(())
 }
 

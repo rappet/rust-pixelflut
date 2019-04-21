@@ -32,5 +32,6 @@ fn main() -> Result<(), Box<Error>> {
     for stream in listener.incoming() {
         handle_client(stream?)?;
     }
+    
     Ok(())
 }
