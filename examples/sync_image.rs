@@ -29,9 +29,7 @@ fn main() -> Result<(), Box<Error>> {
 
     // draw the image
     for (x, y, color) in image.pixels() {
-        println!("{} {} {:?}", x, y, color);
-        let [r, g, b, a] = color.data;
-        client.set(Pixel::new((x,y), (r, g, b, a)))?;
+        client.set(Pixel::new((x,y), color))?;
     }
 
     Ok(())

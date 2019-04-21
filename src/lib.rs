@@ -10,6 +10,8 @@ extern crate tokio_io;
 extern crate tokio_codec;
 #[cfg(feature = "async")]
 extern crate tokio_core;
+#[cfg(feature = "image")]
+extern crate image;
 
 pub mod error;
 pub mod pixel;

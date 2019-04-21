@@ -168,6 +168,38 @@ impl Into<(u8, u8, u8, u8)> for Color {
     }
 }
 
+#[cfg(feature = "image")]
+impl From<image::Rgb<u8>> for Color {
+    /// Returns a Rgb Color
+    fn from(color: image::Rgb<u8>) -> Color {
+        let [r, g, b] = color.data;
+        Color::rgb(r, g, b)
+    }
+}
+
+#[cfg(feature = "image")]
+impl Into<image::Rgb<u8>> for Color {
+    fn into(self) -> image::Rgb<u8> {
+        image::Rgb { data: [self.r, self.g, self.b] }
+    }
+}
+
+#[cfg(feature = "image")]
+impl From<image::Rgba<u8>> for Color {
+    /// Returns a Rgba Color
+    fn from(color: image::Rgba<u8>) -> Color {
+        let [r, g, b, a] = color.data;
+        Color::rgba(r, g, b, a)
+    }
+}
+
+#[cfg(feature = "image")]
+impl Into<image::Rgba<u8>> for Color {
+    fn into(self) -> image::Rgba<u8> {
+        image::Rgba { data: [self.r, self.g, self.b, self.a.unwrap_or(255)] }
+    }
+}
+
 impl FromStr for Color {
     type Err = Error;
 
