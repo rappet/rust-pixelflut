@@ -22,6 +22,10 @@ name = "sync_client"
 required-features = ["sync"]
 
 [[example]]
+name = "sync_image"
+required-features = ["sync", "image"]
+
+[[example]]
 name = "sync_server"
 required-features = ["sync"]
 
@@ -37,3 +41,4 @@ tokio = { version = "0.1", optional = true }
 tokio-io = { version = "0.1", optional = true }
 tokio-codec = { version = "0.1", optional = true }
 tokio-core = { version = "0.1", optional = true }
+image = { version = "0.21", optional = true }
