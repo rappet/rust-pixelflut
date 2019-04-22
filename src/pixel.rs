@@ -120,6 +120,24 @@ impl Color {
         }
     }
 
+    /// Constructs a new `Color` using the alpha channel only, if a != 255.
+    /// 
+    /// # Examples
+    /// 
+    /// Basic usage:
+    /// 
+    /// ```
+    /// use pixelflut::Color;
+    /// assert_eq!(Color::packed(123, 23, 42, 255), Color::rgb(123, 23, 42));
+    /// assert_eq!(Color::packed(123, 23, 42, 64), Color::rgba(123, 23, 42, 64));
+    /// ```
+    pub fn packed(r: u8, g: u8, b: u8, a: u8) -> Color {
+        match a {
+            255 => Color::rgb(r, g, b),
+            a => Color::rgba(r, g, b, a),
+        }
+    }
+
     /// Returns a 4-Tuple with the components red, green, blue and alpha
     ///
     /// If no alpha channel is present, 255 is returned as the alpha channel.
@@ -189,7 +207,7 @@ impl From<image::Rgba<u8>> for Color {
     /// Returns a Rgba Color
     fn from(color: image::Rgba<u8>) -> Color {
         let [r, g, b, a] = color.data;
-        Color::rgba(r, g, b, a)
+        Color::packed(r, g, b, a)
     }
 }
 
