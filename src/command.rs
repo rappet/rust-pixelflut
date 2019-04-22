@@ -84,12 +84,6 @@ impl From<Pixel> for Command {
     }
 }
 
-///
-///
-///
-///
-///
-
 /// A pixelflut command
 /// 
 /// Send to the Client
