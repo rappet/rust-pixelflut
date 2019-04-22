@@ -1,3 +1,7 @@
+//! # pixelflut
+//! 
+//! pixelflut is a sync and async pixelflut implementation for Rust.
+
 #[cfg(feature = "sync")]
 extern crate bufstream;
 #[cfg(feature = "async")]
