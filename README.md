@@ -55,5 +55,5 @@ fn main() -> Result<(), Box<Error>> {
 
 ## License
 
-MIT/Apache 2
+MIT
 
