@@ -1,12 +1,12 @@
 [package]
 name = "pixelflut"
-version = "0.0.2"
+version = "0.1.0"
 authors = ["Raphael Peters <raphael.r.peters@gmail.com>"]
-license = "MIT/Apache-2.0"
+license = "MIT"
 readme = "README.md"
 description = """
-An unfinished library for encoding and decoding pixelflut messages providing a
-simple async protocol interface using tokio.
+An library for encoding and decoding pixelflut messages providing a
+simple sync and async protocol interface using tokio.
 """
 homepage = "https://github.com/rappet/rust-pixelflut"
 repository = "https://github.com/rappet/rust-pixelflut"
