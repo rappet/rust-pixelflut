@@ -1,6 +1,9 @@
 # rust-pixelflut, a pixelflut client and server library
 
 [![Build status](https://api.travis-ci.org/rappet/rust-pixelflut.png)](https://travis-ci.org/rappet/rust-pixelflut)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![crates.io](https://meritbadge.herokuapp.com/pixelflut)](https://crates.io/crates/pixelflut)
+[![Released API docs](https://docs.rs/pixelflut/badge.svg)](https://docs.rs/pixelflut)
 
 
 rust-pixelflut is a sync and async implementation of the pixelflut protocol for Rust.
