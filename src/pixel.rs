@@ -144,7 +144,7 @@ impl Color {
     ///
     /// # Examples
     ///
-    /// ```no_run
+    /// ```
     /// use pixelflut::Color;
     /// assert_eq!((255, 0, 0, 255), Color::rgb(255, 0, 0).normalized())
     /// ```
@@ -221,6 +221,20 @@ impl Into<image::Rgba<u8>> for Color {
 impl FromStr for Color {
     type Err = Error;
 
+    /// Converts a string to a color
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use pixelflut::Color;
+    /// assert_eq!(Color::rgb(0x11, 0x22, 0x33), "112233".parse().unwrap());
+    /// assert_eq!(Color::rgba(0x11, 0x22, 0x33, 0xee), "112233ee".parse().unwrap());
+    /// assert!("".parse::<Color>().is_err());
+    /// assert!("123".parse::<Color>().is_err());
+    /// assert!("12345".parse::<Color>().is_err());
+    /// assert!(" 1 2 3".parse::<Color>().is_err());
+    /// assert!("112g33".parse::<Color>().is_err());
+    /// ```
     fn from_str(s: &str) -> Result<Color> {
         match s.len() {
             6  => Ok( Color::rgb (
@@ -288,15 +302,5 @@ mod tests {
         assert_eq!((0x11, 0x22, 0x33, 0x44),
                    Color::rgba(0x11, 0x22, 0x33, 0x44).normalized());
     }
-
-    #[test]
-    fn test_color_from_str() {
-        assert_eq!(Color::rgb(0x11, 0x22, 0x33), "112233".parse().unwrap());
-        assert_eq!(Color::rgba(0x11, 0x22, 0x33, 0xee), "112233ee".parse().unwrap());
-        assert!("".parse::<Color>().is_err());
-        assert!("123".parse::<Color>().is_err());
-        assert!("12345".parse::<Color>().is_err());
-        assert!(" 1 2 3".parse::<Color>().is_err());
-        assert!("112g33".parse::<Color>().is_err());
-    }
+    
 }
