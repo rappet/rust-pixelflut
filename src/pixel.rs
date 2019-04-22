@@ -138,6 +138,25 @@ impl Color {
         }
     }
 
+    /// Strips the alpha channel if not existent or value is 255.Color
+    /// 
+    /// # Examples
+    /// 
+    /// Basic usage:
+    /// 
+    /// ```
+    /// use pixelflut::Color;
+    /// assert_eq!(Color::rgba(12, 34, 56, 255).pack(), Color::rgb(12, 34, 56));
+    /// assert_eq!(Color::rgb(12, 34, 56).pack(), Color::rgb(12, 34, 56));
+    /// assert_eq!(Color::rgba(12, 34, 56, 78).pack(), Color::rgba(12, 34, 56, 78));
+    /// ```
+    pub fn pack(&self) -> Color {
+        match self.a {
+            None | Some(255) => Color::rgb(self.r, self.g, self.b),
+            _ => *self
+        }
+    }
+
     /// Returns a 4-Tuple with the components red, green, blue and alpha
     ///
     /// If no alpha channel is present, 255 is returned as the alpha channel.
