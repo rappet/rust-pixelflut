@@ -304,9 +304,7 @@ impl fmt::Debug for Color {
 
 #[cfg(test)]
 mod tests {
-    use Color;
-    use Coordinate;
-    use Pixel;
+    use crate::{Color, Coordinate, Pixel};
 
     #[test]
     fn test_pixel_from_str() {

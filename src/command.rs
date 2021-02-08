@@ -143,9 +143,6 @@ mod test {
 
     #[test]
     fn display() {
-        use command::{Command, Response};
-        use pixel::Pixel;
-
         let pxcommand = Command::Px(Pixel::new((45, 67).into(), (0x11, 0x22, 0x55).into()));
 
         assert_eq!(format!("{}", pxcommand), "PX 45 67 112255");
