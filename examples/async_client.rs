@@ -14,7 +14,7 @@ async fn main() {
 
     for h in 0..height {
         for w in 0..width {
-            client.write_pixel(((w, h), (255, 255, 255))).await.unwrap();
+            client.set(((w, h), (255, 255, 255))).await.unwrap();
         }
     }
     client.flush().await.unwrap();

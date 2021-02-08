@@ -38,7 +38,7 @@ impl PixelflutClient {
     /// The pixel is only send if the buffer is full or [flush] is called.
     ///
     /// [flush]: Self::flush
-    pub async fn write_pixel(&mut self, pixel: impl Into<Pixel>) -> Result<()> {
+    pub async fn set(&mut self, pixel: impl Into<Pixel>) -> Result<()> {
         self.write_command(&Command::Px(pixel.into())).await
     }
 
