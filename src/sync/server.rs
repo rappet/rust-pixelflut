@@ -1,21 +1,21 @@
 //! Contains the sync server for pixelflut.
+use std::io::{self, BufRead, BufReader, Write};
 use std::net::TcpStream;
-use std::io::{self, Write, BufRead, BufReader};
 
 use command::{Command, Response};
 use error::Result;
 
 /// The `PixelflutStream` struct parses Pixelflut command
 /// from any TcpStream.TcpStream
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```no_run
 /// use pixelflut::sync::PixelflutStream;
 /// use pixelflut::{Command, Result, Response};
-/// 
+///
 /// use std::net::TcpStream;
-/// 
+///
 /// fn handle_client(stream: TcpStream) -> Result<()> {
 ///     let mut stream = PixelflutStream::new(stream);
 ///     
@@ -33,21 +33,22 @@ use error::Result;
 /// }
 /// ```
 pub struct PixelflutStream {
-    reader: BufReader<TcpStream>
+    reader: BufReader<TcpStream>,
 }
 
 impl PixelflutStream {
-
     /// Creates a new `PixelflutStream` from a `TcpStream`.
     pub fn new(stream: TcpStream) -> PixelflutStream {
         PixelflutStream {
-            reader: BufReader::new(stream)
+            reader: BufReader::new(stream),
         }
     }
 
     /// Sends a `Response` to the client.
     pub fn send_response(&mut self, response: &Response) -> Result<()> {
-        self.reader.get_mut().write_fmt(format_args!("{}\n", response))?;
+        self.reader
+            .get_mut()
+            .write_fmt(format_args!("{}\n", response))?;
         Ok(())
     }
 

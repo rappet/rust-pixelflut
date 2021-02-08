@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Raphael Peters <raphael.r.peters@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+edition = "2018"
 description = """
 An library for encoding and decoding pixelflut messages providing a
 simple sync and async protocol interface using tokio.
@@ -13,9 +14,9 @@ repository = "https://github.com/rappet/rust-pixelflut"
 keywords = ["pixelflut"]
 
 [features]
-default = ["sync"]
+default = ["tokio-rt"]
 sync = ["bufstream"]
-async = ["bytes", "futures", "tokio", "tokio-io", "tokio-codec", "tokio-core"]
+tokio-rt = ["tokio"]
 
 [[example]]
 name = "sync_client"
@@ -33,12 +34,25 @@ required-features = ["sync"]
 name = "async_server"
 required-features = ["async"]
 
-[dependencies]
-bufstream = { version = "0.1", optional = true }
-bytes = { version = "0.4", optional = true }
-futures = { version = "0.1", optional = true }
-tokio = { version = "0.1", optional = true }
-tokio-io = { version = "0.1", optional = true }
-tokio-codec = { version = "0.1", optional = true }
-tokio-core = { version = "0.1", optional = true }
-image = { version = "0.21", optional = true }
+[[example]]
+name = "async_client"
+required-features = ["tokio-rt"]
+
+[dependencies.bufstream]
+version = "0.1.4"
+optional = true
+
+[dependencies.bstr]
+version = "0.2.15"
+
+[dependencies.bytes]
+version = "1"
+
+[dependencies.tokio]
+version = "1"
+features = ["full"]
+optional = true
+
+[dependencies.image]
+version = "0.23"
+optional = true

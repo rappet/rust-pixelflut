@@ -1,7 +1,7 @@
 //! A module that contians pixels for pixelflut.
+use crate::error::{Error, ErrorKind, Result};
 use std::fmt;
 use std::str::FromStr;
-use error::{Error, ErrorKind, Result};
 
 /// pixelflut pixel
 #[derive(Copy, Clone, PartialEq, Hash, Debug)]
@@ -12,11 +12,8 @@ pub struct Pixel {
 
 impl Pixel {
     /// construct a new `Pixel` with a `Coordinate` and a `Color`
-    pub fn new<P: Into<Coordinate>, C: Into<Color>>(position: P, color: C) -> Pixel {
-        Pixel {
-            position: position.into(),
-            color: color.into(),
-        }
+    pub fn new(position: Coordinate, color: Color) -> Pixel {
+        Pixel { position, color }
     }
 }
 
@@ -33,16 +30,31 @@ impl FromStr for Pixel {
         let mut iter = s.split_whitespace();
         let pixel = Pixel::new(
             Coordinate::new(
-                iter.next().ok_or(ErrorKind::WrongNumberOfArguments)?.parse()?,
-                iter.next().ok_or(ErrorKind::WrongNumberOfArguments)?.parse()?
+                iter.next()
+                    .ok_or(ErrorKind::WrongNumberOfArguments)?
+                    .parse()?,
+                iter.next()
+                    .ok_or(ErrorKind::WrongNumberOfArguments)?
+                    .parse()?,
             ),
-            iter.next().ok_or(ErrorKind::WrongNumberOfArguments)?.parse::<Color>()?
+            iter.next()
+                .ok_or(ErrorKind::WrongNumberOfArguments)?
+                .parse::<Color>()?,
         );
         if iter.next().is_some() {
             Err(ErrorKind::WrongNumberOfArguments.into())
         } else {
             Ok(pixel)
         }
+    }
+}
+
+impl<P: Into<Coordinate>, C: Into<Color>> From<(P, C)> for Pixel {
+    fn from((position, color): (P, C)) -> Self {
+        Pixel::new(
+            position.into(),
+            color.into()
+        )
     }
 }
 
@@ -87,7 +99,6 @@ pub struct Color {
 }
 
 impl Color {
-    
     /// Constructs a new `Color` without using an alpha channel.
     ///
     /// # Examples
@@ -99,9 +110,7 @@ impl Color {
     /// Color::rgb(255, 255, 255);
     /// ```
     pub fn rgb(r: u8, g: u8, b: u8) -> Color {
-        Color {
-            r, g, b, a: None
-        }
+        Color { r, g, b, a: None }
     }
 
     /// Constructs a new `Color` using an alpha channel.
@@ -116,16 +125,19 @@ impl Color {
     /// ```
     pub fn rgba(r: u8, g: u8, b: u8, a: u8) -> Color {
         Color {
-            r, g, b, a: Some(a)
+            r,
+            g,
+            b,
+            a: Some(a),
         }
     }
 
     /// Constructs a new `Color` using the alpha channel only, if a != 255.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// Basic usage:
-    /// 
+    ///
     /// ```
     /// use pixelflut::Color;
     /// assert_eq!(Color::packed(123, 23, 42, 255), Color::rgb(123, 23, 42));
@@ -139,11 +151,11 @@ impl Color {
     }
 
     /// Strips the alpha channel if not existent or value is 255.Color
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// Basic usage:
-    /// 
+    ///
     /// ```
     /// use pixelflut::Color;
     /// assert_eq!(Color::rgba(12, 34, 56, 255).pack(), Color::rgb(12, 34, 56));
@@ -153,7 +165,7 @@ impl Color {
     pub fn pack(&self) -> Color {
         match self.a {
             None | Some(255) => Color::rgb(self.r, self.g, self.b),
-            _ => *self
+            _ => *self,
         }
     }
 
@@ -170,7 +182,7 @@ impl Color {
     pub fn normalized(self) -> (u8, u8, u8, u8) {
         match self.a {
             Some(a) => (self.r, self.g, self.b, a),
-            None    => (self.r, self.g, self.b, 255),
+            None => (self.r, self.g, self.b, 255),
         }
     }
 }
@@ -181,7 +193,6 @@ impl From<(u8, u8, u8)> for Color {
         Color::rgb(color.0, color.1, color.2)
     }
 }
-
 
 impl From<(u8, u8, u8, u8)> for Color {
     /// Returns a RGBA Color
@@ -217,7 +228,7 @@ impl From<image::Rgb<u8>> for Color {
 #[cfg(feature = "image")]
 impl Into<image::Rgb<u8>> for Color {
     fn into(self) -> image::Rgb<u8> {
-        image::Rgb { data: [self.r, self.g, self.b] }
+        image::Rgb([self.r, self.g, self.b])
     }
 }
 
@@ -233,7 +244,7 @@ impl From<image::Rgba<u8>> for Color {
 #[cfg(feature = "image")]
 impl Into<image::Rgba<u8>> for Color {
     fn into(self) -> image::Rgba<u8> {
-        image::Rgba { data: [self.r, self.g, self.b, self.a.unwrap_or(255)] }
+        image::Rgba([self.r, self.g, self.b, self.a.unwrap_or(255)])
     }
 }
 
@@ -241,9 +252,9 @@ impl FromStr for Color {
     type Err = Error;
 
     /// Converts a string to a color
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use pixelflut::Color;
     /// assert_eq!(Color::rgb(0x11, 0x22, 0x33), "112233".parse().unwrap());
@@ -256,19 +267,18 @@ impl FromStr for Color {
     /// ```
     fn from_str(s: &str) -> Result<Color> {
         match s.len() {
-            6  => Ok( Color::rgb (
+            6 => Ok(Color::rgb(
                 u8::from_str_radix(&s[0..2], 16)?,
                 u8::from_str_radix(&s[2..4], 16)?,
                 u8::from_str_radix(&s[4..6], 16)?,
             )),
-            8  => Ok( Color::rgba (
+            8 => Ok(Color::rgba(
                 u8::from_str_radix(&s[0..2], 16)?,
                 u8::from_str_radix(&s[2..4], 16)?,
                 u8::from_str_radix(&s[4..6], 16)?,
                 u8::from_str_radix(&s[6..8], 16)?,
             )),
-            _ => Err(ErrorKind::Parse.with_description("color length is wrong"))
-
+            _ => Err(ErrorKind::Parse.with_description("color length is wrong")),
         }
     }
 }
@@ -277,7 +287,7 @@ impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.a {
             Some(a) => write!(f, "{:02x}{:02x}{:02x}{:02x}", self.r, self.g, self.b, a),
-            None    => write!(f, "{:02x}{:02x}{:02x}", self.r, self.g, self.b),
+            None => write!(f, "{:02x}{:02x}{:02x}", self.r, self.g, self.b),
         }
     }
 }
@@ -290,36 +300,53 @@ impl fmt::Debug for Color {
 
 #[cfg(test)]
 mod tests {
-    use Pixel;
-    use Coordinate;
     use Color;
+    use Coordinate;
+    use Pixel;
 
     #[test]
     fn test_pixel_from_str() {
-        assert_eq!(Pixel::new(
-            Coordinate::new(10, 20),
-            Color::rgb(0x11, 0x22, 0x33),
-        ), "10 20 112233".parse().unwrap());
+        assert_eq!(
+            Pixel::new(Coordinate::new(10, 20), Color::rgb(0x11, 0x22, 0x33),),
+            "10 20 112233".parse().unwrap()
+        );
     }
 
     #[test]
     fn test_color_rgb() {
-        assert_eq!(Color { r: 0x11, g: 0x22, b: 0x33, a: None },
-                   Color::rgb(0x11, 0x22, 0x33));
+        assert_eq!(
+            Color {
+                r: 0x11,
+                g: 0x22,
+                b: 0x33,
+                a: None
+            },
+            Color::rgb(0x11, 0x22, 0x33)
+        );
     }
 
     #[test]
     fn test_color_rgba() {
-        assert_eq!(Color { r: 0x11, g: 0x22, b: 0x33, a: Some(0x44)},
-                   Color::rgba(0x11, 0x22, 0x33, 0x44));
+        assert_eq!(
+            Color {
+                r: 0x11,
+                g: 0x22,
+                b: 0x33,
+                a: Some(0x44)
+            },
+            Color::rgba(0x11, 0x22, 0x33, 0x44)
+        );
     }
 
     #[test]
     fn test_color_normalized() {
-        assert_eq!((0x11, 0x22, 0x33, 0xff),
-                   Color::rgb(0x11, 0x22, 0x33).normalized());
-        assert_eq!((0x11, 0x22, 0x33, 0x44),
-                   Color::rgba(0x11, 0x22, 0x33, 0x44).normalized());
+        assert_eq!(
+            (0x11, 0x22, 0x33, 0xff),
+            Color::rgb(0x11, 0x22, 0x33).normalized()
+        );
+        assert_eq!(
+            (0x11, 0x22, 0x33, 0x44),
+            Color::rgba(0x11, 0x22, 0x33, 0x44).normalized()
+        );
     }
-    
 }

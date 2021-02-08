@@ -1,12 +1,12 @@
 //! Contains the sync client for pixelflut.
 use bufstream::BufStream;
 
-use std::net::{ToSocketAddrs, TcpStream};
-use std::io::{self, Write, BufRead};
+use std::io::{self, BufRead, Write};
+use std::net::{TcpStream, ToSocketAddrs};
 
 use command::{Command, Response};
-use pixel::Pixel;
 use error::Result;
+use pixel::Pixel;
 
 /// a Pixelflut Client connection
 pub struct Client {
@@ -14,12 +14,11 @@ pub struct Client {
 }
 
 impl Client {
-
     /// connects to a Pixelflut host at address `addr`
-    pub fn connect<A: ToSocketAddrs> (addr: A) -> Result<Client> {
+    pub fn connect<A: ToSocketAddrs>(addr: A) -> Result<Client> {
         let stream = TcpStream::connect(addr)?;
         Ok(Client {
-            stream: BufStream::new(stream)
+            stream: BufStream::new(stream),
         })
     }
 
@@ -30,7 +29,7 @@ impl Client {
         let mut line = String::new();
         let n = self.stream.read_line(&mut line)?;
         if n > 0 {
-            let response: Response = line[0..n-1].parse()?;
+            let response: Response = line[0..n - 1].parse()?;
             match response {
                 Response::Size { w, h } => Ok((w, h)),
             }
@@ -43,7 +42,8 @@ impl Client {
     /// Pixels will be put on a internal buffer and flushed periodically
     /// to the server. You can flush the buffer manualy with `flush`.
     pub fn set<P: Into<Pixel>>(&mut self, pixel: P) -> Result<()> {
-        self.stream.write_fmt(format_args!("{}\n", Command::Px(pixel.into())))?;
+        self.stream
+            .write_fmt(format_args!("{}\n", Command::Px(pixel.into())))?;
         Ok(())
     }
 
@@ -52,5 +52,4 @@ impl Client {
         self.stream.flush()?;
         Ok(())
     }
-
 }

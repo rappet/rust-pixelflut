@@ -1,9 +1,9 @@
+use std::convert::From;
 use std::error;
 use std::fmt;
-use std::result;
-use std::convert::From;
-use std::str::Utf8Error;
 use std::num::ParseIntError;
+use std::result;
+use std::str::Utf8Error;
 
 pub type Result<T> = result::Result<T, Error>;
 
@@ -32,6 +32,7 @@ pub enum ErrorKind {
     InvalidCommand,
     WrongNumberOfArguments,
     Parse,
+    State,
 }
 
 impl ErrorKind {
@@ -41,12 +42,13 @@ impl ErrorKind {
             ErrorKind::InvalidCommand => "invalid command",
             ErrorKind::WrongNumberOfArguments => "wrong number of arguments",
             ErrorKind::Parse => "parse error",
+            ErrorKind::State => "invalid state",
         }
     }
 
     pub(crate) fn with_description(self, description: &'static str) -> Error {
         Error {
-            repr: Repr::Description(self, description)
+            repr: Repr::Description(self, description),
         }
     }
 }
@@ -55,7 +57,7 @@ impl From<ErrorKind> for Error {
     #[inline]
     fn from(kind: ErrorKind) -> Error {
         Error {
-            repr: Repr::Simple(kind)
+            repr: Repr::Simple(kind),
         }
     }
 }
@@ -80,22 +82,14 @@ impl fmt::Display for Error {
             Repr::ParseInt(ref err) => write!(fmt, "parse int error: {}", err),
             Repr::Utf8(err) => write!(fmt, "utf8 error: {}", err),
             Repr::Simple(kind) => write!(fmt, "{}", kind.as_str()),
-            Repr::Description(kind, description) => write!(fmt, "{}: {}", kind.as_str(), description),
+            Repr::Description(kind, description) => {
+                write!(fmt, "{}: {}", kind.as_str(), description)
+            }
         }
     }
 }
 
 impl error::Error for Error {
-    fn description(&self) -> &str {
-        match self.repr {
-            Repr::Simple(..) => self.kind().as_str(),
-            Repr::Description(_, description) => description,
-            Repr::Io(ref err) => err.description(),
-            Repr::ParseInt(ref err) => err.description(),
-            Repr::Utf8(ref err) => err.description(),
-        }
-    }
-
     fn source(&self) -> Option<&(dyn error::Error + 'static)> {
         match self.repr {
             Repr::Io(ref err) => err.source(),

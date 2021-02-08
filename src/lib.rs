@@ -1,30 +1,24 @@
 //! # pixelflut
-//! 
-//! pixelflut is a sync and async pixelflut implementation for Rust.
+//!
+//! pixelflut is a sync and async_tokio pixelflut implementation for Rust.
 
+extern crate bstr;
 #[cfg(feature = "sync")]
 extern crate bufstream;
-#[cfg(feature = "async")]
 extern crate bytes;
-#[cfg(feature = "async")]
-extern crate futures;
-#[cfg(feature = "async")]
-extern crate tokio_io;
-#[cfg(feature = "async")]
-extern crate tokio_codec;
-#[cfg(feature = "async")]
-extern crate tokio_core;
 #[cfg(feature = "image")]
 extern crate image;
+#[cfg(feature = "tokio-rt")]
+extern crate tokio;
 
+#[cfg(feature = "tokio-rt")]
+pub mod async_tokio;
+pub mod command;
 pub mod error;
 pub mod pixel;
-pub mod command;
 #[cfg(feature = "sync")]
 pub mod sync;
-#[cfg(feature = "async")]
-pub mod async;
 
-pub use error::{Error, Result};
-pub use pixel::{Pixel, Color, Coordinate};
 pub use command::{Command, Response};
+pub use error::{Error, Result};
+pub use pixel::{Color, Coordinate, Pixel};

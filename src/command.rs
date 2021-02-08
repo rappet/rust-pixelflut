@@ -17,14 +17,14 @@
 //! }
 //! ```
 
-use std::{fmt};
+use std::fmt;
 use std::str::FromStr;
 
-use pixel::{Pixel, Coordinate, Color};
-use error::{Error, ErrorKind, Result};
+use crate::error::{Error, ErrorKind, Result};
+use crate::pixel::{Color, Coordinate, Pixel};
 
 /// A pixelflut command
-/// 
+///
 /// Send to the Server
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Command {
@@ -35,7 +35,7 @@ pub enum Command {
 impl fmt::Display for Command {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Command::Px ( ref pixel ) => write!(f, "PX {}", pixel),
+            Command::Px(ref pixel) => write!(f, "PX {}", pixel),
             Command::Size => write!(f, "SIZE"),
         }
     }
@@ -50,22 +50,26 @@ impl FromStr for Command {
         let command = iter.next().ok_or(ErrorKind::InvalidCommand)?;
 
         let command = match command {
-            "PX" => { Command::Px( Pixel::new(
+            "PX" => Command::Px(Pixel::new(
                 Coordinate::new(
                     iter.next()
-                        .ok_or(ErrorKind::WrongNumberOfArguments)?.parse()?,
+                        .ok_or(ErrorKind::WrongNumberOfArguments)?
+                        .parse()?,
                     iter.next()
-                        .ok_or(ErrorKind::WrongNumberOfArguments)?.parse()?
+                        .ok_or(ErrorKind::WrongNumberOfArguments)?
+                        .parse()?,
                 ),
-                iter.next().ok_or(ErrorKind::WrongNumberOfArguments)?.parse::<Color>()?
-            ) ) },
+                iter.next()
+                    .ok_or(ErrorKind::WrongNumberOfArguments)?
+                    .parse::<Color>()?,
+            )),
             "SIZE" => {
                 if iter.next().is_some() {
-                    return Err(ErrorKind::WrongNumberOfArguments.into())
+                    return Err(ErrorKind::WrongNumberOfArguments.into());
                 } else {
                     Command::Size
                 }
-            },
+            }
             _ => return Err(ErrorKind::InvalidCommand.into()),
         };
 
@@ -74,7 +78,6 @@ impl FromStr for Command {
         } else {
             Err(ErrorKind::WrongNumberOfArguments.into())
         }
-
     }
 }
 
@@ -85,9 +88,10 @@ impl From<Pixel> for Command {
 }
 
 /// A pixelflut command
-/// 
+///
 /// Send to the Client
 #[derive(Debug, Copy, Clone, PartialEq)]
+#[non_exhaustive]
 pub enum Response {
     Size { w: u32, h: u32 },
 }
@@ -95,8 +99,7 @@ pub enum Response {
 impl fmt::Display for Response {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Response::Size { w, h } =>
-                write!(f, "SIZE {} {}", w, h),
+            Response::Size { w, h } => write!(f, "SIZE {} {}", w, h),
         }
     }
 }
@@ -114,13 +117,15 @@ impl FromStr for Response {
                 if let Some(w) = iter.next() {
                     Response::Size {
                         w: w.parse()?,
-                        h: iter.next()
-                            .ok_or(ErrorKind::WrongNumberOfArguments)?.parse()?,
+                        h: iter
+                            .next()
+                            .ok_or(ErrorKind::WrongNumberOfArguments)?
+                            .parse()?,
                     }
                 } else {
-                    return Err(ErrorKind::WrongNumberOfArguments.into())
+                    return Err(ErrorKind::WrongNumberOfArguments.into());
                 }
-            },
+            }
             _ => return Err(ErrorKind::InvalidCommand.into()),
         };
 
@@ -129,34 +134,31 @@ impl FromStr for Response {
         } else {
             Err(ErrorKind::WrongNumberOfArguments.into())
         }
-
     }
 }
 
 #[cfg(test)]
 mod test {
+    use crate::{Command, Pixel, Response};
+
     #[test]
     fn display() {
         use command::{Command, Response};
         use pixel::Pixel;
 
-        let pxcommand = Command::Px(Pixel::new((45, 67), (0x11, 0x22, 0x55)));
+        let pxcommand = Command::Px(Pixel::new((45, 67).into(), (0x11, 0x22, 0x55).into()));
 
-        assert_eq!( format!("{}", pxcommand), "PX 45 67 112255" );
-        assert_eq!( pxcommand, "PX 45 67 112255".parse().unwrap() );
-        assert_eq!( format!("{}", Command::Size), "SIZE" );
-        assert_eq!( Command::Size, "SIZE".parse().unwrap() );
-        assert_eq!(
-            format!("{}", Response::Size { w: 12, h: 34 } ),
-            "SIZE 12 34"
-        );
+        assert_eq!(format!("{}", pxcommand), "PX 45 67 112255");
+        assert_eq!(pxcommand, "PX 45 67 112255".parse().unwrap());
+        assert_eq!(format!("{}", Command::Size), "SIZE");
+        assert_eq!(Command::Size, "SIZE".parse().unwrap());
+        assert_eq!(format!("{}", Response::Size { w: 12, h: 34 }), "SIZE 12 34");
         assert_eq!(
             Response::Size { w: 12, h: 34 },
             "SIZE 12 34".parse().unwrap()
         );
-        assert!( "SIZE Blah".parse::<Response>().is_err() );
-        assert!( "FOO".parse::<Response>().is_err() );
-        assert!( "FOO".parse::<Response>().is_err() );
+        assert!("SIZE Blah".parse::<Response>().is_err());
+        assert!("FOO".parse::<Response>().is_err());
+        assert!("FOO".parse::<Response>().is_err());
     }
-
 }
