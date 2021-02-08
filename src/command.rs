@@ -21,7 +21,10 @@ use std::fmt;
 use std::str::FromStr;
 
 use crate::error::{Error, ErrorKind, Result};
-use crate::pixel::{Color, Coordinate, Pixel};
+use crate::pixel::{Color, Coordinate, Pixel, LARGE_COORDINATE_SIZE, MAX_COLOR_SIZE};
+
+pub static LARGE_COMMAND_LENGTH: usize = 3 + LARGE_COORDINATE_SIZE + 1 + MAX_COLOR_SIZE;
+pub static MAX_COMMAND_LENGTH: usize = 256;
 
 /// A pixelflut command
 ///
@@ -139,7 +142,8 @@ impl FromStr for Response {
 
 #[cfg(test)]
 mod test {
-    use crate::{Command, Pixel, Response};
+    use crate::command::{Command, Response};
+    use crate::Pixel;
 
     #[test]
     fn display() {

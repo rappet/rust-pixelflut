@@ -1,5 +1,6 @@
+use crate::command::{Command, Response};
 use crate::error::ErrorKind;
-use crate::{Command, Pixel, Response, Result};
+use crate::{Pixel, Result};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufStream};
 use tokio::net::{TcpStream, ToSocketAddrs};
 
@@ -8,6 +9,7 @@ pub struct PixelflutClient {
 }
 
 impl PixelflutClient {
+    /// Connect to a Pixelflut server.
     pub async fn connect(addr: impl ToSocketAddrs) -> Result<PixelflutClient> {
         let stream = TcpStream::connect(addr).await?;
         Ok(PixelflutClient {
@@ -30,10 +32,24 @@ impl PixelflutClient {
         Ok(response)
     }
 
+    /// Writes a Pixel to the server.
+    ///
+    /// A buffered stream is used for sending.
+    /// The pixel is only send if the buffer is full or [flush] is called.
+    ///
+    /// [flush]: Self::flush
     pub async fn write_pixel(&mut self, pixel: impl Into<Pixel>) -> Result<()> {
         self.write_command(&Command::Px(pixel.into())).await
     }
 
+    /// Asks the server for the dimensions of the canvas.
+    ///
+    /// A `SIZE` command is send to the server.
+    /// If the server replies with a `SIZE <width> <height>` packet,
+    /// the dimensions will be returned.
+    ///
+    /// # Returns
+    /// Ok((width, height)) on success
     pub async fn dimensions(&mut self) -> Result<(u32, u32)> {
         self.write_command(&Command::Size).await?;
         self.flush().await?;
@@ -44,6 +60,7 @@ impl PixelflutClient {
         })
     }
 
+    /// Flushes the internal buffer to the server.
     pub async fn flush(&mut self) -> Result<()> {
         self.stream.flush().await?;
         Ok(())

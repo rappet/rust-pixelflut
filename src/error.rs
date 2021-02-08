@@ -124,3 +124,9 @@ impl From<Utf8Error> for Error {
         }
     }
 }
+
+impl From<bstr::Utf8Error> for Error {
+    fn from(_err: bstr::Utf8Error) -> Error {
+        ErrorKind::Parse.with_description("UTF-8 error")
+    }
+}

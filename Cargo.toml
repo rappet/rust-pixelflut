@@ -32,7 +32,7 @@ required-features = ["sync"]
 
 [[example]]
 name = "async_server"
-required-features = ["async"]
+required-features = ["tokio-rt"]
 
 [[example]]
 name = "async_client"
@@ -56,3 +56,6 @@ optional = true
 [dependencies.image]
 version = "0.23"
 optional = true
+
+[dependencies.memchr]
+version = "2.3"
