@@ -3,6 +3,10 @@ use crate::error::{Error, ErrorKind, Result};
 use std::fmt;
 use std::str::FromStr;
 
+pub static LARGE_COORDINATE_SIZE: usize = 9;
+pub static MAX_COLOR_SIZE: usize = 8;
+pub static LARGE_COMMAND_LENGTH: usize = 3 + LARGE_COORDINATE_SIZE + 1 + MAX_COLOR_SIZE;
+
 /// pixelflut pixel
 #[derive(Copy, Clone, PartialEq, Hash, Debug)]
 pub struct Pixel {
