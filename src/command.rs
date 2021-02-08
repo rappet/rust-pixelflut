@@ -1,21 +1,4 @@
 //! A module for working with Pixelflut commands.
-//!
-//! # Examples
-//!
-//! Parsing commands:
-//! ```
-//! use pixelflut::{Command, Pixel, Coordinate};
-//! use pixelflut::error::Result;
-//!
-//! let command: Result<Command> = "PX 10 20 aabbcc".parse();
-//!
-//! match command {
-//!     Ok(Command::Px( Pixel{ position: Coordinate{ x, y }, .. } ))
-//!         => println!("draw pixel on {x} {y}", x = x, y = y),
-//!     Ok(Command::Size) => println!("resturn size of field"),
-//!     Err(err) => println!("client send shit: {}", err),
-//! }
-//! ```
 
 use std::fmt;
 use std::str::FromStr;
