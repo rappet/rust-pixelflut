@@ -33,16 +33,18 @@ pub enum ErrorKind {
     WrongNumberOfArguments,
     Parse,
     State,
+    ServerError,
 }
 
 impl ErrorKind {
     pub(crate) fn as_str(self) -> &'static str {
         match self {
-            ErrorKind::Io => "Io error",
+            ErrorKind::Io => "io error",
             ErrorKind::InvalidCommand => "invalid command",
             ErrorKind::WrongNumberOfArguments => "wrong number of arguments",
             ErrorKind::Parse => "parse error",
             ErrorKind::State => "invalid state",
+            ErrorKind::ServerError => "got error from server",
         }
     }
 

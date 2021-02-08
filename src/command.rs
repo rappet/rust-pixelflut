@@ -22,6 +22,7 @@ use std::str::FromStr;
 
 use crate::error::{Error, ErrorKind, Result};
 use crate::pixel::{Color, Coordinate, Pixel, LARGE_COORDINATE_SIZE, MAX_COLOR_SIZE};
+use std::borrow::Cow;
 
 pub static LARGE_COMMAND_LENGTH: usize = 3 + LARGE_COORDINATE_SIZE + 1 + MAX_COLOR_SIZE;
 pub static MAX_COMMAND_LENGTH: usize = 256;
@@ -93,16 +94,19 @@ impl From<Pixel> for Command {
 /// A pixelflut command
 ///
 /// Send to the Client
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 #[non_exhaustive]
 pub enum Response {
     Size { w: u32, h: u32 },
+    Error(Cow<'static, str>),
 }
 
 impl fmt::Display for Response {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Response::Size { w, h } => write!(f, "SIZE {} {}", w, h),
+        use Response::*;
+        match self {
+            Size { w, h } => write!(f, "SIZE {} {}", w, h),
+            Error(msg) => write!(f, "ERROR {}", msg),
         }
     }
 }
@@ -125,6 +129,13 @@ impl FromStr for Response {
                             .ok_or(ErrorKind::WrongNumberOfArguments)?
                             .parse()?,
                     }
+                } else {
+                    return Err(ErrorKind::WrongNumberOfArguments.into());
+                }
+            }
+            "ERROR" => {
+                if s.len() > 6 {
+                    Response::Error(Cow::Owned(s[6..].into()))
                 } else {
                     return Err(ErrorKind::WrongNumberOfArguments.into());
                 }

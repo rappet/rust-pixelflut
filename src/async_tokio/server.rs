@@ -1,9 +1,9 @@
 use bytes::BytesMut;
 use tokio::net::TcpStream;
 
-use crate::command::{Command, MAX_COMMAND_LENGTH, Response};
+use crate::command::{Command, Response, MAX_COMMAND_LENGTH};
 use crate::error::ErrorKind;
-use crate::{Result, Pixel};
+use crate::{Pixel, Result};
 use bstr::ByteSlice;
 use std::str::FromStr;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
@@ -43,7 +43,14 @@ impl PixelflutServerStream {
         loop {
             if let Some(pos) = memchr::memchr(b'\n', self.read_buf.as_ref()) {
                 let slice = &self.read_buf.as_ref()[0..pos];
-                let command = Command::from_str(slice.to_str()?)?;
+                let command = match Command::from_str(slice.to_str()?) {
+                    Ok(command) => command,
+                    Err(err) => {
+                        self.send_response(&Response::Error(err.to_string().into()))
+                            .await?;
+                        return Err(err);
+                    }
+                };
                 let _ = self.read_buf.split_to(pos + 1);
                 return Ok(Some(command));
             } else if self.read_buf.len() > MAX_COMMAND_LENGTH {
@@ -74,9 +81,10 @@ impl PixelflutServerStream {
                     self.send_response(&Response::Size {
                         w: self.dimensions.0,
                         h: self.dimensions.1,
-                    }).await?
-                },
-                None => return Ok(None)
+                    })
+                    .await?
+                }
+                None => return Ok(None),
             }
         }
     }
