@@ -4,12 +4,8 @@ use std::fmt;
 use std::str::FromStr;
 
 use crate::error::{Error, ErrorKind, Result};
-use crate::pixel::{Color, Coordinate, Pixel, LARGE_COORDINATE_SIZE, MAX_COLOR_SIZE};
+use crate::pixel::{Color, Coordinate, Pixel};
 use std::borrow::Cow;
-use std::io::Write;
-
-pub static LARGE_COMMAND_LENGTH: usize = 3 + LARGE_COORDINATE_SIZE + 1 + MAX_COLOR_SIZE;
-pub static MAX_COMMAND_LENGTH: usize = 256;
 
 /// A pixelflut command
 ///

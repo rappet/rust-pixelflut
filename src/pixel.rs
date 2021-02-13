@@ -3,8 +3,15 @@ use crate::error::{Error, ErrorKind, Result};
 use std::fmt;
 use std::str::FromStr;
 
-pub static LARGE_COORDINATE_SIZE: usize = 9;
-pub static MAX_COLOR_SIZE: usize = 8;
+pub static MAX_FORMATTED_COORDINATE_SIZE: usize = 10;
+pub static MAX_FORMATTED_COLOR_SIZE: usize = 8;
+pub static MAX_FORMATTED_PIXEL_SIZE: usize = 3
+    + MAX_FORMATTED_COORDINATE_SIZE
+    + 1
+    + MAX_FORMATTED_COORDINATE_SIZE
+    + 1
+    + MAX_FORMATTED_COLOR_SIZE;
+pub static MAX_FORMATTED_PIXEL_SIZE_NEWLINE: usize = MAX_FORMATTED_PIXEL_SIZE + 1;
 
 /// pixelflut pixel
 #[derive(Copy, Clone, PartialEq, Hash, Debug, Default)]
@@ -92,10 +99,10 @@ impl fmt::Display for Coordinate {
 
 #[derive(Copy, Clone, PartialEq, Hash, Default)]
 pub struct Color {
-    r: u8,
-    g: u8,
-    b: u8,
-    a: Option<u8>,
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
+    pub a: Option<u8>,
 }
 
 impl Color {

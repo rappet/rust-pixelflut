@@ -21,7 +21,8 @@
 //!     let addr: SocketAddr = "localhost:1337".parse().unwrap();
 //!     let mut pixelflut = PixelflutClient::connect(addr).await.unwrap();
 //!     println!("{:?}", pixelflut.dimensions().await.unwrap());
-//!     pixelflut.set(((1, 2), (255, 0, 0))).await.unwrap();
+//!     pixelflut.set(1, 2, (255, 0, 0)).await.unwrap();
+//!     pixelflut.flush();
 //! }
 //! ```
 //!
@@ -36,14 +37,18 @@ extern crate image;
 extern crate memchr;
 #[cfg(feature = "tokio-rt")]
 extern crate tokio;
+#[macro_use]
+extern crate lazy_static;
 
 #[cfg(feature = "tokio-rt")]
 pub mod async_tokio;
 mod command;
 mod error;
 mod pixel;
+mod pixel_buffer;
 #[cfg(feature = "sync")]
 pub mod sync;
 
 pub use error::{Error, Result};
 pub use pixel::{Color, Coordinate, Pixel};
+pub use pixel_buffer::PixelBuffer;
