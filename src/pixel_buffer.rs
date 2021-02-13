@@ -5,6 +5,37 @@ use std::sync::Arc;
 
 pub static PIXEL_BUFFER_DEFAULT_CAPACITY: usize = 8 * 1024;
 
+/// Pixel buffer is a byte buffer that guarantees to contain valid pixelflut data.
+/// It is used as an internal buffer for the sync and async clients and
+/// can also be used for pre-format an array of pixels,
+/// as the PixelBuffer can direclty be send with a client.
+///
+/// # Examples
+///
+/// ```
+/// use pixelflut::{PixelBuffer, Pixel};
+/// let mut buffer = PixelBuffer::new();
+///
+/// // Add some pixel to the buffer
+/// buffer.write_pixel(&Pixel::new((12, 34).into(), (255, 0, 10).into()));
+/// buffer.write_pixel(&Pixel::new((13, 34).into(), (255, 0, 10).into()));
+/// assert_eq!(buffer.as_slice(), b"PX 12 34 ff000a\nPX 13 34 ff000a\n");
+///
+/// // There is still capacity in the buffer
+/// assert!(!buffer.is_capacity_reached());
+///
+/// // Fill the buffer until the capacity is barely reached, without reallocating the buffer.
+/// let mut i = 0;
+/// while !buffer.is_capacity_reached() {
+///     // draw a red line
+///     buffer.write_pixel(&Pixel::new((i, 0).into(), (255, 0, 0).into()));
+///     i += 1;
+/// }
+///
+/// // Clear the buffer
+/// buffer.clear();
+/// assert!(buffer.is_empty());
+/// ```
 pub struct PixelBuffer {
     buffer: Vec<u8>,
     number_writer: NumberWriter,
