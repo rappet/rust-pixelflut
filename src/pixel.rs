@@ -7,7 +7,7 @@ pub static LARGE_COORDINATE_SIZE: usize = 9;
 pub static MAX_COLOR_SIZE: usize = 8;
 
 /// pixelflut pixel
-#[derive(Copy, Clone, PartialEq, Hash, Debug)]
+#[derive(Copy, Clone, PartialEq, Hash, Debug, Default)]
 pub struct Pixel {
     pub position: Coordinate,
     pub color: Color,
@@ -59,7 +59,7 @@ impl<P: Into<Coordinate>, C: Into<Color>> From<(P, C)> for Pixel {
 }
 
 /// coordinate on a pixelflut grid
-#[derive(Copy, Clone, PartialEq, Hash, Debug)]
+#[derive(Copy, Clone, PartialEq, Hash, Debug, Default)]
 pub struct Coordinate {
     pub x: u32,
     pub y: u32,
@@ -90,7 +90,7 @@ impl fmt::Display for Coordinate {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Hash)]
+#[derive(Copy, Clone, PartialEq, Hash, Default)]
 pub struct Color {
     r: u8,
     g: u8,
