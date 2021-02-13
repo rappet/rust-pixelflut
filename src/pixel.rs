@@ -109,7 +109,7 @@ impl Color {
     /// use pixelflut::Color;
     /// Color::rgb(255, 255, 255);
     /// ```
-    pub fn rgb(r: u8, g: u8, b: u8) -> Color {
+    pub const fn rgb(r: u8, g: u8, b: u8) -> Color {
         Color { r, g, b, a: None }
     }
 
@@ -123,12 +123,35 @@ impl Color {
     /// use pixelflut::Color;
     /// Color::rgba(255, 255, 255, 255);
     /// ```
-    pub fn rgba(r: u8, g: u8, b: u8, a: u8) -> Color {
+    pub const fn rgba(r: u8, g: u8, b: u8, a: u8) -> Color {
         Color {
             r,
             g,
             b,
             a: Some(a),
+        }
+    }
+
+    /// Returns the alpha channel of the `Color`.
+    ///
+    /// If the color does not have an alpha channel, `255` will be returned.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use pixelflut::Color;
+    ///
+    /// let without_alpha = Color::rgb(123, 123, 123);
+    /// assert_eq!(without_alpha.alpha(), 255);
+    ///
+    /// let with_alpha = Color::rgba(123, 123, 123, 123);
+    /// assert_eq!(with_alpha.alpha(), 123)
+    /// ```
+    pub const fn alpha(self) -> u8 {
+        if let Some(alpha) = self.a {
+            alpha
+        } else {
+            255
         }
     }
 
@@ -143,7 +166,7 @@ impl Color {
     /// assert_eq!(Color::packed(123, 23, 42, 255), Color::rgb(123, 23, 42));
     /// assert_eq!(Color::packed(123, 23, 42, 64), Color::rgba(123, 23, 42, 64));
     /// ```
-    pub fn packed(r: u8, g: u8, b: u8, a: u8) -> Color {
+    pub const fn packed(r: u8, g: u8, b: u8, a: u8) -> Color {
         match a {
             255 => Color::rgb(r, g, b),
             a => Color::rgba(r, g, b, a),
@@ -162,7 +185,7 @@ impl Color {
     /// assert_eq!(Color::rgb(12, 34, 56).pack(), Color::rgb(12, 34, 56));
     /// assert_eq!(Color::rgba(12, 34, 56, 78).pack(), Color::rgba(12, 34, 56, 78));
     /// ```
-    pub fn pack(&self) -> Color {
+    pub const fn pack(&self) -> Color {
         match self.a {
             None | Some(255) => Color::rgb(self.r, self.g, self.b),
             _ => *self,
@@ -179,7 +202,7 @@ impl Color {
     /// use pixelflut::Color;
     /// assert_eq!((255, 0, 0, 255), Color::rgb(255, 0, 0).normalized())
     /// ```
-    pub fn normalized(self) -> (u8, u8, u8, u8) {
+    pub const fn normalized(self) -> (u8, u8, u8, u8) {
         match self.a {
             Some(a) => (self.r, self.g, self.b, a),
             None => (self.r, self.g, self.b, 255),
@@ -201,18 +224,15 @@ impl From<(u8, u8, u8, u8)> for Color {
     }
 }
 
-impl Into<(u8, u8, u8)> for Color {
-    fn into(self) -> (u8, u8, u8) {
-        (self.r, self.g, self.b)
+impl From<Color> for (u8, u8, u8) {
+    fn from(color: Color) -> (u8, u8, u8) {
+        (color.r, color.g, color.b)
     }
 }
 
-impl Into<(u8, u8, u8, u8)> for Color {
-    fn into(self) -> (u8, u8, u8, u8) {
-        match self.a {
-            Some(a) => (self.r, self.g, self.b, a),
-            None => (self.r, self.g, self.b, 255),
-        }
+impl From<Color> for (u8, u8, u8, u8) {
+    fn from(color: Color) -> (u8, u8, u8, u8) {
+        (color.r, color.g, color.b, color.alpha())
     }
 }
 
