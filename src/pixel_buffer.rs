@@ -167,7 +167,7 @@ impl NumberWriter {
         for i in 0..=255 {
             let str = format!("{:02x}", i);
             hex02[i][0] = str.as_bytes()[0];
-            hex02[i][1] = str.as_bytes()[0];
+            hex02[i][1] = str.as_bytes()[1];
         }
 
         let mut decimal = Vec::new();
@@ -184,11 +184,6 @@ impl NumberWriter {
     /// Generate a NumberWriter with default parameters
     pub(crate) fn create() -> NumberWriter {
         Self::with_decimal_size(NUMBER_WRITER_DEFAULT_MAX_DECIMAL)
-    }
-
-    /// Get the default NumberWriter
-    pub fn new() -> NumberWriter {
-        Default::default()
     }
 
     pub fn write_hex02(&self, mut writer: impl Write, value: u8) -> std::io::Result<()> {
