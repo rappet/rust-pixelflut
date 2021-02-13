@@ -2,8 +2,8 @@
 use std::io::{self, BufRead, BufReader, Write};
 use std::net::TcpStream;
 
-use command::{Command, Response};
-use error::Result;
+use crate::command::{Command, Response};
+use crate::error::Result;
 
 /// The `PixelflutStream` struct parses Pixelflut command
 /// from any TcpStream.TcpStream
@@ -11,13 +11,13 @@ use error::Result;
 /// # Examples
 ///
 /// ```no_run
-/// use pixelflut::sync::PixelflutStream;
+/// use pixelflut::sync::PixelflutServerStream;
 /// use pixelflut::{Command, Result, Response};
 ///
 /// use std::net::TcpStream;
 ///
 /// fn handle_client(stream: TcpStream) -> Result<()> {
-///     let mut stream = PixelflutStream::new(stream);
+///     let mut stream = PixelflutServerStream::new(stream);
 ///     
 ///     while let Ok(command) = stream.read() {
 ///         match command {
@@ -25,21 +25,21 @@ use error::Result;
 ///             Command::Size => {
 ///                 let response = Response::Size{ w: 800, h: 600 };
 ///                 stream.send_response(&response)?
-///             },
+///             }
 ///         }
 ///     }
 ///     
 ///     Ok(())
 /// }
 /// ```
-pub struct PixelflutStream {
+pub struct PixelflutServerStream {
     reader: BufReader<TcpStream>,
 }
 
-impl PixelflutStream {
+impl PixelflutServerStream {
     /// Creates a new `PixelflutStream` from a `TcpStream`.
-    pub fn new(stream: TcpStream) -> PixelflutStream {
-        PixelflutStream {
+    pub fn new(stream: TcpStream) -> PixelflutServerStream {
+        PixelflutServerStream {
             reader: BufReader::new(stream),
         }
     }

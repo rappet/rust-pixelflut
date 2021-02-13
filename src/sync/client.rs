@@ -5,20 +5,20 @@ use std::io::{self, BufRead, Write};
 use std::net::{TcpStream, ToSocketAddrs};
 
 use crate::command::{Command, Response};
-use crate::Result;
-use crate::pixel::Pixel;
 use crate::error::ErrorKind;
+use crate::pixel::Pixel;
+use crate::{Color, Result};
 
 /// a Pixelflut Client connection
-pub struct Client {
+pub struct PixelflutClient {
     stream: BufStream<TcpStream>,
 }
 
-impl Client {
+impl PixelflutClient {
     /// connects to a Pixelflut host at address `addr`
-    pub fn connect(addr: impl ToSocketAddrs) -> Result<Client> {
+    pub fn connect(addr: impl ToSocketAddrs) -> Result<PixelflutClient> {
         let stream = TcpStream::connect(addr)?;
-        Ok(Client {
+        Ok(PixelflutClient {
             stream: BufStream::new(stream),
         })
     }
@@ -40,7 +40,7 @@ impl Client {
             let response: Response = line[0..n - 1].parse()?;
             match response {
                 Response::Size { w, h } => Ok((w, h)),
-                Response::Error(err) => Err(ErrorKind::ServerError.into())
+                Response::Error(err) => Err(ErrorKind::ServerError.into()),
             }
         } else {
             Err(io::Error::new(io::ErrorKind::UnexpectedEof, "expected size").into())
@@ -53,9 +53,10 @@ impl Client {
     /// The pixel is only send if the buffer is full or [flush] is called.
     ///
     /// [flush]: Self::flush
-    pub fn set(&mut self, pixel: impl Into<Pixel>) -> Result<()> {
+    pub fn set(&mut self, x: u32, y: u32, color: impl Into<Color>) -> Result<()> {
+        let pixel = Pixel::new((x, y).into(), color.into());
         self.stream
-            .write_fmt(format_args!("{}\n", Command::Px(pixel.into())))?;
+            .write_fmt(format_args!("{}\n", Command::Px(pixel)))?;
         Ok(())
     }
 
