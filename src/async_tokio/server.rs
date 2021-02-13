@@ -1,8 +1,9 @@
 use bytes::BytesMut;
 use tokio::net::TcpStream;
 
-use crate::command::{Command, Response, MAX_COMMAND_LENGTH};
+use crate::command::{Command, Response};
 use crate::error::ErrorKind;
+use crate::pixel::MAX_FORMATTED_PIXEL_SIZE_NEWLINE;
 use crate::{Pixel, Result};
 use bstr::ByteSlice;
 use std::str::FromStr;
@@ -14,7 +15,6 @@ pub struct PixelflutServerStream {
     stream: TcpStream,
     read_buf: BytesMut,
     dimensions: (u32, u32),
-    capacity: usize,
 }
 
 impl PixelflutServerStream {
@@ -35,7 +35,6 @@ impl PixelflutServerStream {
             stream,
             read_buf: BytesMut::with_capacity(capacity),
             dimensions,
-            capacity,
         }
     }
 
@@ -53,7 +52,7 @@ impl PixelflutServerStream {
                 };
                 let _ = self.read_buf.split_to(pos + 1);
                 return Ok(Some(command));
-            } else if self.read_buf.len() > MAX_COMMAND_LENGTH {
+            } else if self.read_buf.len() > MAX_FORMATTED_PIXEL_SIZE_NEWLINE {
                 return Err(ErrorKind::Io.with_description("line is to long"));
             } else {
                 if self.stream.read_buf(&mut self.read_buf).await? == 0 {
