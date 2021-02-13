@@ -67,7 +67,7 @@ impl PixelflutClient {
     }
 
     pub async fn write_buffer(&mut self, buffer: &PixelBuffer) -> Result<()> {
-        self.flush();
+        self.flush().await?;
         self.stream.write_all(buffer.as_slice()).await?;
         Ok(())
     }
