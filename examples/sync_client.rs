@@ -1,26 +1,32 @@
+extern crate clap;
 extern crate pixelflut;
+extern crate tokio;
 
-use pixelflut::sync::Client;
-use pixelflut::Pixel;
-
-use std::error::Error;
+use clap::Clap;
+use pixelflut::sync::PixelflutClient;
 use std::net::SocketAddr;
 
-fn main() -> Result<(), Box<Error>> {
-    let host: SocketAddr = std::env::args()
-        .nth(1)
-        .unwrap_or("127.0.0.1:1337".to_string())
-        .parse()?;
-    let mut client = Client::connect(host)?;
+#[derive(Clap)]
+struct Opts {
+    #[clap(default_value = "127.0.0.1:1337")]
+    addr: String,
+}
 
-    // get the screen size
-    let (w, h) = client.size()?;
-    println!("Size: {}x{}", w, h);
+fn main() -> anyhow::Result<()> {
+    let opts = Opts::parse();
+    let addr: SocketAddr = opts.addr.parse()?;
+    let mut client = PixelflutClient::connect(addr)?;
 
-    // write a red line
-    for i in 5..10 {
-        client.set(Pixel::new((i, 6), (255, 0, 0)))?;
+    let (width, height) = client.dimensions().await.unwrap();
+    let (width, height) = (1920u32, 1080u32);
+    println!("Size: {}x{}", width, height);
+
+    for h in 0..height {
+        for w in 0..width {
+            client.set(w, h, (255, 255, 255))?;
+        }
     }
+    client.flush()?;
 
     Ok(())
 }
