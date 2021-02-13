@@ -2,6 +2,7 @@ use crate::pixel::MAX_FORMATTED_PIXEL_SIZE_NEWLINE;
 use crate::Pixel;
 use std::io::Write;
 use std::sync::Arc;
+use std::iter::FromIterator;
 
 pub static PIXEL_BUFFER_DEFAULT_CAPACITY: usize = 8 * 1024;
 
@@ -148,6 +149,16 @@ impl AsRef<[u8]> for PixelBuffer {
     }
 }
 
+impl<P: Into<Pixel>> FromIterator<P> for PixelBuffer {
+    fn from_iter<T: IntoIterator<Item=P>>(iter: T) -> Self {
+        let mut buffer = PixelBuffer::new();
+        for pixel in iter.into_iter() {
+            buffer.write_pixel(&pixel.into());
+        }
+        buffer
+    }
+}
+
 lazy_static! {
     static ref NUMBER_WRITER: NumberWriter = NumberWriter::create();
 }
@@ -202,5 +213,21 @@ impl NumberWriter {
 impl Default for NumberWriter {
     fn default() -> Self {
         NUMBER_WRITER.clone()
+    }
+}
+
+
+#[cfg(test)]
+mod test {
+    use crate::{Pixel, PixelBuffer};
+
+    #[test]
+    fn pixelbuffer_from_iter() {
+        let v = vec![
+            Pixel::from(((12, 34), (255, 0, 10))),
+            Pixel::from(((12, 35), (0, 255, 10))),
+        ];
+        let buffer: PixelBuffer = v.into_iter().collect();
+        assert_eq!(buffer.as_slice(), b"PX 12 34 ff000a\nPX 12 35 00ff0a\n");
     }
 }
