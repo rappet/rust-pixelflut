@@ -1,7 +1,10 @@
-//! [![crates-io]](https://crates.io/crates/pixelflut) [![docs-rs]](https://docs.rs/pixelflut/)
+//! [![crates-io]](https://crates.io/crates/pixelflut)
+//! [![docs-rs]](https://docs.rs/pixelflut/)
+//! [![license]](../LICENSE)
 //!
 //! [crates-io]: https://img.shields.io/crates/v/pixelflut?style=for-the-badge
 //! [docs-rs]: https://img.shields.io/docsrs/pixelflut?style=for-the-badge
+//! [license]: https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge
 //!
 //! ---
 //!
