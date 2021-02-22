@@ -1,3 +1,4 @@
+//! The async Tokio implementation of pixelflut.
 mod client;
 mod server;
 

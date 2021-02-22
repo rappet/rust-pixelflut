@@ -4,6 +4,7 @@ use crate::{Color, Pixel, PixelBuffer, Result};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::{TcpStream, ToSocketAddrs};
 
+/// Async Pixelflut client.
 pub struct PixelflutClient {
     stream: BufReader<TcpStream>,
     write_buf: PixelBuffer,

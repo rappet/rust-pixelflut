@@ -5,8 +5,7 @@ use std::net::TcpStream;
 use crate::command::{Command, Response};
 use crate::error::Result;
 
-/// The `PixelflutStream` struct parses Pixelflut command
-/// from any TcpStream.TcpStream
+/// Sync Pixelflut server connection.
 ///
 /// # Examples
 ///

@@ -11,6 +11,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 pub static SERVER_READ_BUFFER_DEFAULT_CAPACITY: usize = 2 << 16;
 
+/// Async Pixelflut server connection.
 pub struct PixelflutServerStream {
     stream: TcpStream,
     read_buf: BytesMut,

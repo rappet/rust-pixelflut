@@ -9,7 +9,7 @@ use crate::error::ErrorKind;
 use crate::pixel::Pixel;
 use crate::{Color, Result};
 
-/// a Pixelflut Client connection
+/// Sync Pixelflut client.
 pub struct PixelflutClient {
     stream: BufStream<TcpStream>,
 }
