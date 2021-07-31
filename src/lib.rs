@@ -23,6 +23,6 @@ mod pixel_buffer;
 #[cfg_attr(docsrs, doc(cfg(feature = "sync")))]
 pub mod sync;
 
-pub use error::{PixelflutError, PixelflutResult};
+pub use error::{PixelflutError, PixelflutResult, PixelflutErrorKind};
 pub use pixel::{Color, Coordinate, Pixel};
 pub use pixel_buffer::PixelBuffer;
