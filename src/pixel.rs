@@ -13,7 +13,7 @@ pub static MAX_FORMATTED_PIXEL_SIZE: usize = 3
     + MAX_FORMATTED_COLOR_SIZE;
 pub static MAX_FORMATTED_PIXEL_SIZE_NEWLINE: usize = MAX_FORMATTED_PIXEL_SIZE + 1;
 
-/// pixelflut pixel
+/// Pixelflut pixel containing a coordinate and a color
 #[derive(Copy, Clone, PartialEq, Hash, Debug, Default)]
 pub struct Pixel {
     pub position: Coordinate,
@@ -97,6 +97,7 @@ impl fmt::Display for Coordinate {
     }
 }
 
+/// RGB color type with optional alpha channel
 #[derive(Copy, Clone, PartialEq, Hash, Default)]
 pub struct Color {
     pub r: u8,

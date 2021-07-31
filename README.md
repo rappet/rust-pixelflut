@@ -5,7 +5,9 @@
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge)](./LICENSE)
 [![Github](https://img.shields.io/badge/github-rappet/rust--pixelflut-8da0cb?style=for-the-badge&labelColor=555555&logo=github)](https://github.com/rappet/rust-pixelflut)
 
-rust-pixelflut is a sync and async implementation of the pixelflut protocol for Rust.
+A sync and async implementation of the [Pixelflut] protocol for Rust.
+
+[Pixelflut]: https://cccgoe.de/wiki/Pixelflut
 
 # Usage
 Import in rust project:
@@ -15,8 +17,12 @@ Import in rust project:
 pixelflut = "0.2.0-alpha.2"
 ```
 
-## Features
-To enable support for the image crate use the "image" feature.
+## Feature flags
+
+- `image`: Enable support for color types used in the [`image`] crate
+- `tokio-rt`: Enable support for the async client/server
+
+[`image`]: https://docs.rs/image/
 
 # Performance
 

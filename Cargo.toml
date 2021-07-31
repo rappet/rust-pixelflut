@@ -6,8 +6,7 @@ license = "MIT"
 readme = "README.md"
 edition = "2018"
 description = """
-An library for encoding and decoding pixelflut messages providing a
-simple sync and async protocol interface using tokio.
+An async/sync Pixelflut server/client library
 """
 homepage = "https://github.com/rappet/rust-pixelflut"
 repository = "https://github.com/rappet/rust-pixelflut"
@@ -72,3 +71,7 @@ optional = true
 
 [dependencies.lazy_static]
 version = "1.4.0"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
