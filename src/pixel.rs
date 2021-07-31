@@ -1,5 +1,5 @@
 //! A module that contians pixels for pixelflut.
-use crate::error::{Error, ErrorKind, Result};
+use crate::error::{PixelflutError, PixelflutErrorKind, PixelflutResult};
 use std::fmt;
 use std::str::FromStr;
 
@@ -34,25 +34,25 @@ impl fmt::Display for Pixel {
 }
 
 impl FromStr for Pixel {
-    type Err = Error;
+    type Err = PixelflutError;
 
-    fn from_str(s: &str) -> Result<Pixel> {
+    fn from_str(s: &str) -> PixelflutResult<Pixel> {
         let mut iter = s.split_whitespace();
         let pixel = Pixel::new(
             Coordinate::new(
                 iter.next()
-                    .ok_or(ErrorKind::WrongNumberOfArguments)?
+                    .ok_or(PixelflutErrorKind::WrongNumberOfArguments)?
                     .parse()?,
                 iter.next()
-                    .ok_or(ErrorKind::WrongNumberOfArguments)?
+                    .ok_or(PixelflutErrorKind::WrongNumberOfArguments)?
                     .parse()?,
             ),
             iter.next()
-                .ok_or(ErrorKind::WrongNumberOfArguments)?
+                .ok_or(PixelflutErrorKind::WrongNumberOfArguments)?
                 .parse::<Color>()?,
         );
         if iter.next().is_some() {
-            Err(ErrorKind::WrongNumberOfArguments.into())
+            Err(PixelflutErrorKind::WrongNumberOfArguments.into())
         } else {
             Ok(pixel)
         }
@@ -276,7 +276,7 @@ impl Into<image::Rgba<u8>> for Color {
 }
 
 impl FromStr for Color {
-    type Err = Error;
+    type Err = PixelflutError;
 
     /// Converts a string to a color
     ///
@@ -292,7 +292,7 @@ impl FromStr for Color {
     /// assert!(" 1 2 3".parse::<Color>().is_err());
     /// assert!("112g33".parse::<Color>().is_err());
     /// ```
-    fn from_str(s: &str) -> Result<Color> {
+    fn from_str(s: &str) -> PixelflutResult<Color> {
         match s.len() {
             6 => Ok(Color::rgb(
                 u8::from_str_radix(&s[0..2], 16)?,
@@ -305,7 +305,7 @@ impl FromStr for Color {
                 u8::from_str_radix(&s[4..6], 16)?,
                 u8::from_str_radix(&s[6..8], 16)?,
             )),
-            _ => Err(ErrorKind::Parse.with_description("color length is wrong")),
+            _ => Err(PixelflutErrorKind::Parse.with_description("color length is wrong")),
         }
     }
 }

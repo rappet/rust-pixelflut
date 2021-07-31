@@ -43,15 +43,17 @@ extern crate tokio;
 #[macro_use]
 extern crate lazy_static;
 
-#[cfg(feature = "tokio-rt")]
+#[cfg(any(doc, feature = "tokio-rt"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "tokio-rt")))]
 pub mod async_tokio;
 mod command;
 mod error;
 mod pixel;
 mod pixel_buffer;
-#[cfg(feature = "sync")]
+#[cfg(any(doc, feature = "sync"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "sync")))]
 pub mod sync;
 
-pub use error::{Error, Result};
+pub use error::{PixelflutError, PixelflutResult};
 pub use pixel::{Color, Coordinate, Pixel};
 pub use pixel_buffer::PixelBuffer;

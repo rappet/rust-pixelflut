@@ -6,7 +6,7 @@ use pixelflut::{Command, Response};
 use std::error::Error;
 use std::net::{SocketAddr, TcpListener, TcpStream};
 
-fn handle_client(stream: TcpStream) -> pixelflut::Result<()> {
+fn handle_client(stream: TcpStream) -> pixelflut::PixelflutResult<()> {
     let mut stream = PixelflutStream::new(stream);
 
     while let Ok(command) = stream.read() {

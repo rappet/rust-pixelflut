@@ -3,7 +3,7 @@ use std::io::{self, BufRead, BufReader, Write};
 use std::net::TcpStream;
 
 use crate::command::{Command, Response};
-use crate::error::Result;
+use crate::error::PixelflutResult;
 
 /// Sync Pixelflut server connection.
 ///
@@ -11,11 +11,11 @@ use crate::error::Result;
 ///
 /// ```no_run
 /// use pixelflut::sync::PixelflutServerStream;
-/// use pixelflut::{Command, Result, Response};
+/// use pixelflut::{Command, PixelflutResult, Response};
 ///
 /// use std::net::TcpStream;
 ///
-/// fn handle_client(stream: TcpStream) -> Result<()> {
+/// fn handle_client(stream: TcpStream) -> PixelflutResult<()> {
 ///     let mut stream = PixelflutServerStream::new(stream);
 ///     
 ///     while let Ok(command) = stream.read() {
@@ -44,7 +44,7 @@ impl PixelflutServerStream {
     }
 
     /// Sends a `Response` to the client.
-    pub fn send_response(&mut self, response: &Response) -> Result<()> {
+    pub fn send_response(&mut self, response: &Response) -> PixelflutResult<()> {
         self.reader
             .get_mut()
             .write_fmt(format_args!("{}\n", response))?;
@@ -52,7 +52,7 @@ impl PixelflutServerStream {
     }
 
     /// Reads a `Command` from the stream.
-    pub fn read(&mut self) -> Result<Command> {
+    pub fn read(&mut self) -> PixelflutResult<Command> {
         let mut line = String::new();
         let n = self.reader.read_line(&mut line)?;
         if n > 0 {

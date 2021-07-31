@@ -5,13 +5,17 @@ use std::num::ParseIntError;
 use std::result;
 use std::str::Utf8Error;
 
-pub type Result<T> = result::Result<T, Error>;
+/// Pixelflut [`Result`] alias
+pub type PixelflutResult<T> = result::Result<T, PixelflutError>;
 
-pub struct Error {
+/// Pixelflut error type
+///
+/// Use [PixelflutErrorKind] to match specific errors.
+pub struct PixelflutError {
     repr: Repr,
 }
 
-impl fmt::Debug for Error {
+impl fmt::Debug for PixelflutError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         fmt::Debug::fmt(&self.repr, f)
     }
@@ -22,12 +26,12 @@ enum Repr {
     Io(std::io::Error),
     ParseInt(ParseIntError),
     Utf8(Utf8Error),
-    Simple(ErrorKind),
-    Description(ErrorKind, &'static str),
+    Simple(PixelflutErrorKind),
+    Description(PixelflutErrorKind, &'static str),
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub enum ErrorKind {
+pub enum PixelflutErrorKind {
     Io,
     InvalidCommand,
     WrongNumberOfArguments,
@@ -36,48 +40,48 @@ pub enum ErrorKind {
     ServerError,
 }
 
-impl ErrorKind {
+impl PixelflutErrorKind {
     pub(crate) fn as_str(self) -> &'static str {
         match self {
-            ErrorKind::Io => "io error",
-            ErrorKind::InvalidCommand => "invalid command",
-            ErrorKind::WrongNumberOfArguments => "wrong number of arguments",
-            ErrorKind::Parse => "parse error",
-            ErrorKind::State => "invalid state",
-            ErrorKind::ServerError => "got error from server",
+            PixelflutErrorKind::Io => "io error",
+            PixelflutErrorKind::InvalidCommand => "invalid command",
+            PixelflutErrorKind::WrongNumberOfArguments => "wrong number of arguments",
+            PixelflutErrorKind::Parse => "parse error",
+            PixelflutErrorKind::State => "invalid state",
+            PixelflutErrorKind::ServerError => "got error from server",
         }
     }
 
-    pub(crate) fn with_description(self, description: &'static str) -> Error {
-        Error {
+    pub(crate) fn with_description(self, description: &'static str) -> PixelflutError {
+        PixelflutError {
             repr: Repr::Description(self, description),
         }
     }
 }
 
-impl From<ErrorKind> for Error {
+impl From<PixelflutErrorKind> for PixelflutError {
     #[inline]
-    fn from(kind: ErrorKind) -> Error {
-        Error {
+    fn from(kind: PixelflutErrorKind) -> PixelflutError {
+        PixelflutError {
             repr: Repr::Simple(kind),
         }
     }
 }
 
-impl Error {
+impl PixelflutError {
     /// Returns the corresponding `ErrorKind` for this error.
-    pub fn kind(&self) -> ErrorKind {
+    pub fn kind(&self) -> PixelflutErrorKind {
         match self.repr {
-            Repr::Io(_) => ErrorKind::Io,
-            Repr::ParseInt(_) => ErrorKind::Parse,
-            Repr::Utf8(_) => ErrorKind::Parse,
+            Repr::Io(_) => PixelflutErrorKind::Io,
+            Repr::ParseInt(_) => PixelflutErrorKind::Parse,
+            Repr::Utf8(_) => PixelflutErrorKind::Parse,
             Repr::Simple(kind) => kind,
             Repr::Description(kind, _) => kind,
         }
     }
 }
 
-impl fmt::Display for Error {
+impl fmt::Display for PixelflutError {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         match self.repr {
             Repr::Io(ref err) => write!(fmt, "io error: {}", err),
@@ -91,7 +95,7 @@ impl fmt::Display for Error {
     }
 }
 
-impl error::Error for Error {
+impl error::Error for PixelflutError {
     fn source(&self) -> Option<&(dyn error::Error + 'static)> {
         match self.repr {
             Repr::Io(ref err) => err.source(),
@@ -103,32 +107,32 @@ impl error::Error for Error {
     }
 }
 
-impl From<std::io::Error> for Error {
-    fn from(err: std::io::Error) -> Error {
-        Error {
+impl From<std::io::Error> for PixelflutError {
+    fn from(err: std::io::Error) -> PixelflutError {
+        PixelflutError {
             repr: Repr::Io(err),
         }
     }
 }
 
-impl From<ParseIntError> for Error {
-    fn from(err: ParseIntError) -> Error {
-        Error {
+impl From<ParseIntError> for PixelflutError {
+    fn from(err: ParseIntError) -> PixelflutError {
+        PixelflutError {
             repr: Repr::ParseInt(err),
         }
     }
 }
 
-impl From<Utf8Error> for Error {
-    fn from(err: Utf8Error) -> Error {
-        Error {
+impl From<Utf8Error> for PixelflutError {
+    fn from(err: Utf8Error) -> PixelflutError {
+        PixelflutError {
             repr: Repr::Utf8(err),
         }
     }
 }
 
-impl From<bstr::Utf8Error> for Error {
-    fn from(_err: bstr::Utf8Error) -> Error {
-        ErrorKind::Parse.with_description("UTF-8 error")
+impl From<bstr::Utf8Error> for PixelflutError {
+    fn from(_err: bstr::Utf8Error) -> PixelflutError {
+        PixelflutErrorKind::Parse.with_description("UTF-8 error")
     }
 }

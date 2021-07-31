@@ -5,9 +5,9 @@ use std::io::{self, BufRead, Write};
 use std::net::{TcpStream, ToSocketAddrs};
 
 use crate::command::{Command, Response};
-use crate::error::ErrorKind;
+use crate::error::PixelflutErrorKind;
 use crate::pixel::Pixel;
-use crate::{Color, Result};
+use crate::{Color, PixelflutResult};
 
 /// Sync Pixelflut client.
 pub struct PixelflutClient {
@@ -16,7 +16,7 @@ pub struct PixelflutClient {
 
 impl PixelflutClient {
     /// connects to a Pixelflut host at address `addr`
-    pub fn connect(addr: impl ToSocketAddrs) -> Result<PixelflutClient> {
+    pub fn connect(addr: impl ToSocketAddrs) -> PixelflutResult<PixelflutClient> {
         let stream = TcpStream::connect(addr)?;
         Ok(PixelflutClient {
             stream: BufStream::new(stream),
@@ -31,7 +31,7 @@ impl PixelflutClient {
     ///
     /// # Returns
     /// Ok((width, height)) on success
-    pub fn dimensions(&mut self) -> Result<(u32, u32)> {
+    pub fn dimensions(&mut self) -> PixelflutResult<(u32, u32)> {
         self.stream.write_fmt(format_args!("{}\n", Command::Size))?;
         self.stream.flush()?;
         let mut line = String::new();
@@ -40,7 +40,7 @@ impl PixelflutClient {
             let response: Response = line[0..n - 1].parse()?;
             match response {
                 Response::Size { w, h } => Ok((w, h)),
-                Response::Error(err) => Err(ErrorKind::ServerError.into()),
+                Response::Error(err) => Err(PixelflutErrorKind::ServerError.into()),
             }
         } else {
             Err(io::Error::new(io::ErrorKind::UnexpectedEof, "expected size").into())
@@ -53,7 +53,7 @@ impl PixelflutClient {
     /// The pixel is only send if the buffer is full or [flush] is called.
     ///
     /// [flush]: Self::flush
-    pub fn set(&mut self, x: u32, y: u32, color: impl Into<Color>) -> Result<()> {
+    pub fn set(&mut self, x: u32, y: u32, color: impl Into<Color>) -> PixelflutResult<()> {
         let pixel = Pixel::new((x, y).into(), color.into());
         self.stream
             .write_fmt(format_args!("{}\n", Command::Px(pixel)))?;
@@ -61,7 +61,7 @@ impl PixelflutClient {
     }
 
     /// Flushes the internal buffer to the server.
-    pub fn flush(&mut self) -> Result<()> {
+    pub fn flush(&mut self) -> PixelflutResult<()> {
         self.stream.flush()?;
         Ok(())
     }

@@ -3,7 +3,7 @@
 use std::fmt;
 use std::str::FromStr;
 
-use crate::error::{Error, ErrorKind, Result};
+use crate::error::{PixelflutError, PixelflutErrorKind, PixelflutResult};
 use crate::pixel::{Color, Coordinate, Pixel};
 use std::borrow::Cow;
 
@@ -26,41 +26,41 @@ impl fmt::Display for Command {
 }
 
 impl FromStr for Command {
-    type Err = Error;
+    type Err = PixelflutError;
 
-    fn from_str(s: &str) -> Result<Command> {
+    fn from_str(s: &str) -> PixelflutResult<Command> {
         let mut iter = s.split_whitespace();
 
-        let command = iter.next().ok_or(ErrorKind::InvalidCommand)?;
+        let command = iter.next().ok_or(PixelflutErrorKind::InvalidCommand)?;
 
         let command = match command {
             "PX" => Command::Px(Pixel::new(
                 Coordinate::new(
                     iter.next()
-                        .ok_or(ErrorKind::WrongNumberOfArguments)?
+                        .ok_or(PixelflutErrorKind::WrongNumberOfArguments)?
                         .parse()?,
                     iter.next()
-                        .ok_or(ErrorKind::WrongNumberOfArguments)?
+                        .ok_or(PixelflutErrorKind::WrongNumberOfArguments)?
                         .parse()?,
                 ),
                 iter.next()
-                    .ok_or(ErrorKind::WrongNumberOfArguments)?
+                    .ok_or(PixelflutErrorKind::WrongNumberOfArguments)?
                     .parse::<Color>()?,
             )),
             "SIZE" => {
                 if iter.next().is_some() {
-                    return Err(ErrorKind::WrongNumberOfArguments.into());
+                    return Err(PixelflutErrorKind::WrongNumberOfArguments.into());
                 } else {
                     Command::Size
                 }
             }
-            _ => return Err(ErrorKind::InvalidCommand.into()),
+            _ => return Err(PixelflutErrorKind::InvalidCommand.into()),
         };
 
         if iter.next() == None {
             Ok(command)
         } else {
-            Err(ErrorKind::WrongNumberOfArguments.into())
+            Err(PixelflutErrorKind::WrongNumberOfArguments.into())
         }
     }
 }
@@ -92,12 +92,12 @@ impl fmt::Display for Response {
 }
 
 impl FromStr for Response {
-    type Err = Error;
+    type Err = PixelflutError;
 
-    fn from_str(s: &str) -> Result<Response> {
+    fn from_str(s: &str) -> PixelflutResult<Response> {
         let mut iter = s.split_whitespace();
 
-        let command = iter.next().ok_or(ErrorKind::InvalidCommand)?;
+        let command = iter.next().ok_or(PixelflutErrorKind::InvalidCommand)?;
 
         let command = match command {
             "SIZE" => {
@@ -106,27 +106,27 @@ impl FromStr for Response {
                         w: w.parse()?,
                         h: iter
                             .next()
-                            .ok_or(ErrorKind::WrongNumberOfArguments)?
+                            .ok_or(PixelflutErrorKind::WrongNumberOfArguments)?
                             .parse()?,
                     }
                 } else {
-                    return Err(ErrorKind::WrongNumberOfArguments.into());
+                    return Err(PixelflutErrorKind::WrongNumberOfArguments.into());
                 }
             }
             "ERROR" => {
                 if s.len() > 6 {
                     Response::Error(Cow::Owned(s[6..].into()))
                 } else {
-                    return Err(ErrorKind::WrongNumberOfArguments.into());
+                    return Err(PixelflutErrorKind::WrongNumberOfArguments.into());
                 }
             }
-            _ => return Err(ErrorKind::InvalidCommand.into()),
+            _ => return Err(PixelflutErrorKind::InvalidCommand.into()),
         };
 
         if iter.next() == None {
             Ok(command)
         } else {
-            Err(ErrorKind::WrongNumberOfArguments.into())
+            Err(PixelflutErrorKind::WrongNumberOfArguments.into())
         }
     }
 }
