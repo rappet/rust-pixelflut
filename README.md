@@ -52,5 +52,9 @@ async fn main() {
 
 ## License
 
-MIT
+This project is licensed under the [MIT license](https://github.com/rappet/rust-pixelflut/blob/master/LICENSE).
 
+### Contribution
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in rust-pixelflut by you,
+shall be licensed as MIT, without any additional terms or conditions.
