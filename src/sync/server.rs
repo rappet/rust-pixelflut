@@ -36,7 +36,7 @@ impl PixelflutServerStream {
     pub fn new(stream: TcpStream, dimensions: (u32, u32)) -> PixelflutServerStream {
         PixelflutServerStream {
             reader: BufReader::new(stream),
-            dimensions
+            dimensions,
         }
     }
 
@@ -53,10 +53,8 @@ impl PixelflutServerStream {
         let mut line = String::new();
         let _len = match self.reader.read_line(&mut line) {
             Ok(n) => n,
-            Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => {
-                return Ok(None)
-            },
-            Err(e) => return Err(e.into())
+            Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => return Ok(None),
+            Err(e) => return Err(e.into()),
         };
         Ok(Some(line[0..line.len()].parse()?))
     }
@@ -65,12 +63,10 @@ impl PixelflutServerStream {
         loop {
             match self.read_command()? {
                 Some(Command::Px(pixel)) => return Ok(Some(pixel)),
-                Some(Command::Size) => {
-                    self.send_response(&Response::Size {
-                        w: self.dimensions.0,
-                        h: self.dimensions.1,
-                    })?
-                }
+                Some(Command::Size) => self.send_response(&Response::Size {
+                    w: self.dimensions.0,
+                    h: self.dimensions.1,
+                })?,
                 None => return Ok(None),
             }
         }

@@ -1,8 +1,8 @@
 use crate::pixel::MAX_FORMATTED_PIXEL_SIZE_NEWLINE;
 use crate::Pixel;
 use std::io::Write;
-use std::sync::Arc;
 use std::iter::FromIterator;
+use std::sync::Arc;
 
 pub static PIXEL_BUFFER_DEFAULT_CAPACITY: usize = 8 * 1024;
 
@@ -129,13 +129,23 @@ impl PixelBuffer {
         let color = pixel.color;
 
         self.buffer.write_all(b"PX ").unwrap();
-        self.number_writer.write_decimal(&mut self.buffer, x as usize).unwrap();
+        self.number_writer
+            .write_decimal(&mut self.buffer, x as usize)
+            .unwrap();
         self.buffer.write_all(b" ").unwrap();
-        self.number_writer.write_decimal(&mut self.buffer, y as usize).unwrap();
+        self.number_writer
+            .write_decimal(&mut self.buffer, y as usize)
+            .unwrap();
         self.buffer.write_all(b" ").unwrap();
-        self.number_writer.write_hex02(&mut self.buffer, color.r).unwrap();
-        self.number_writer.write_hex02(&mut self.buffer, color.g).unwrap();
-        self.number_writer.write_hex02(&mut self.buffer, color.b).unwrap();
+        self.number_writer
+            .write_hex02(&mut self.buffer, color.r)
+            .unwrap();
+        self.number_writer
+            .write_hex02(&mut self.buffer, color.g)
+            .unwrap();
+        self.number_writer
+            .write_hex02(&mut self.buffer, color.b)
+            .unwrap();
         if let Some(a) = color.a {
             self.number_writer.write_hex02(&mut self.buffer, a).unwrap();
         }
@@ -156,7 +166,7 @@ impl AsRef<[u8]> for PixelBuffer {
 }
 
 impl<P: Into<Pixel>> FromIterator<P> for PixelBuffer {
-    fn from_iter<T: IntoIterator<Item=P>>(iter: T) -> Self {
+    fn from_iter<T: IntoIterator<Item = P>>(iter: T) -> Self {
         let mut buffer = PixelBuffer::new();
         for pixel in iter.into_iter() {
             buffer.write_pixel(&pixel.into());
@@ -221,7 +231,6 @@ impl Default for NumberWriter {
         NUMBER_WRITER.clone()
     }
 }
-
 
 #[cfg(test)]
 mod test {
