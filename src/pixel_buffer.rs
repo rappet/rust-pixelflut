@@ -143,6 +143,12 @@ impl PixelBuffer {
     }
 }
 
+impl Default for PixelBuffer {
+    fn default() -> PixelBuffer {
+        PixelBuffer::new()
+    }
+}
+
 impl AsRef<[u8]> for PixelBuffer {
     fn as_ref(&self) -> &[u8] {
         self.buffer.as_slice()
