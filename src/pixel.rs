@@ -248,7 +248,7 @@ impl From<Color> for (u8, u8, u8, u8) {
 impl From<image::Rgb<u8>> for Color {
     /// Returns a Rgb Color
     fn from(color: image::Rgb<u8>) -> Color {
-        let [r, g, b] = color.data;
+        let [r, g, b] = color.0;
         Color::rgb(r, g, b)
     }
 }
@@ -264,7 +264,7 @@ impl Into<image::Rgb<u8>> for Color {
 impl From<image::Rgba<u8>> for Color {
     /// Returns a Rgba Color
     fn from(color: image::Rgba<u8>) -> Color {
-        let [r, g, b, a] = color.data;
+        let [r, g, b, a] = color.0;
         Color::packed(r, g, b, a)
     }
 }

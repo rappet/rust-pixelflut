@@ -2,14 +2,12 @@ extern crate image;
 extern crate pixelflut;
 
 use pixelflut::sync::PixelflutClient;
-use pixelflut::Pixel;
 
 use image::GenericImageView;
 
-use std::error::Error;
 use std::net::SocketAddr;
 
-fn main() -> Result<(), Box<Error>> {
+fn main() -> anyhow::Result<()> {
     let filename: String = match std::env::args().nth(1) {
         Some(name) => name,
         None => {
@@ -30,7 +28,7 @@ fn main() -> Result<(), Box<Error>> {
     let mut client = PixelflutClient::connect(host)?;
 
     // get the screen size
-    let (w, h) = client.size()?;
+    let (w, h) = client.dimensions()?;
     println!("Size: {}x{}", w, h);
 
     // draw the image
