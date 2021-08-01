@@ -1,6 +1,6 @@
 [package]
 name = "pixelflut"
-version = "0.2.0-alpha.4"
+version = "0.2.0-alpha.5"
 authors = ["Raphael Peters <raphael.r.peters@gmail.com>"]
 license = "MIT"
 readme = "README.md"
