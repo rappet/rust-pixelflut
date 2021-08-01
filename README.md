@@ -14,7 +14,7 @@ Import in rust project:
 
 ```toml
 [dependencies]                                                                  
-pixelflut = "0.2.0-alpha.2"
+pixelflut = "0.2"
 ```
 
 ## Feature flags
