@@ -1,9 +1,10 @@
 //! Contains the sync server for pixelflut.
-use std::io::{self, BufRead, BufReader, Write};
+use std::io::{BufRead, BufReader, Write};
 use std::net::TcpStream;
 
 use crate::command::{Command, Response};
 use crate::error::PixelflutResult;
+use crate::Pixel;
 
 /// Sync Pixelflut server connection.
 ///
@@ -11,21 +12,15 @@ use crate::error::PixelflutResult;
 ///
 /// ```no_run
 /// use pixelflut::sync::PixelflutServerStream;
-/// use pixelflut::{Command, PixelflutResult, Response};
+/// use pixelflut::PixelflutResult;
 ///
 /// use std::net::TcpStream;
 ///
 /// fn handle_client(stream: TcpStream) -> PixelflutResult<()> {
-///     let mut stream = PixelflutServerStream::new(stream);
+///     let mut stream = PixelflutServerStream::new(stream, (800, 600));
 ///     
-///     while let Ok(command) = stream.read() {
-///         match command {
-///             Command::Px(p) => println!("{}", p),
-///             Command::Size => {
-///                 let response = Response::Size{ w: 800, h: 600 };
-///                 stream.send_response(&response)?
-///             }
-///         }
+///     while let Some(pixel) = stream.read_pixel()? {
+///         println!("{:?}", pixel);
 ///     }
 ///     
 ///     Ok(())
@@ -33,18 +28,20 @@ use crate::error::PixelflutResult;
 /// ```
 pub struct PixelflutServerStream {
     reader: BufReader<TcpStream>,
+    dimensions: (u32, u32),
 }
 
 impl PixelflutServerStream {
     /// Creates a new `PixelflutStream` from a `TcpStream`.
-    pub fn new(stream: TcpStream) -> PixelflutServerStream {
+    pub fn new(stream: TcpStream, dimensions: (u32, u32)) -> PixelflutServerStream {
         PixelflutServerStream {
             reader: BufReader::new(stream),
+            dimensions
         }
     }
 
     /// Sends a `Response` to the client.
-    pub fn send_response(&mut self, response: &Response) -> PixelflutResult<()> {
+    fn send_response(&mut self, response: &Response) -> PixelflutResult<()> {
         self.reader
             .get_mut()
             .write_fmt(format_args!("{}\n", response))?;
@@ -52,13 +49,30 @@ impl PixelflutServerStream {
     }
 
     /// Reads a `Command` from the stream.
-    pub fn read(&mut self) -> PixelflutResult<Command> {
+    fn read_command(&mut self) -> PixelflutResult<Option<Command>> {
         let mut line = String::new();
-        let n = self.reader.read_line(&mut line)?;
-        if n > 0 {
-            Ok(line[0..line.len()].parse()?)
-        } else {
-            Err(io::Error::new(io::ErrorKind::UnexpectedEof, "end of stream").into())
+        let _len = match self.reader.read_line(&mut line) {
+            Ok(n) => n,
+            Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => {
+                return Ok(None)
+            },
+            Err(e) => return Err(e.into())
+        };
+        Ok(Some(line[0..line.len()].parse()?))
+    }
+
+    pub fn read_pixel(&mut self) -> PixelflutResult<Option<Pixel>> {
+        loop {
+            match self.read_command()? {
+                Some(Command::Px(pixel)) => return Ok(Some(pixel)),
+                Some(Command::Size) => {
+                    self.send_response(&Response::Size {
+                        w: self.dimensions.0,
+                        h: self.dimensions.1,
+                    })?
+                }
+                None => return Ok(None),
+            }
         }
     }
 }

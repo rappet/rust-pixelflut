@@ -34,7 +34,7 @@ If you want to send data faster, spawn multiple clients or use the internal
 
 # Example
 
-```rust
+```no_run
 extern crate pixelflut;
 extern crate tokio;
 use pixelflut::async_tokio::PixelflutClient;
@@ -42,7 +42,7 @@ use std::net::SocketAddr;
 
 #[tokio::main]
 async fn main() {
-    let addr: SocketAddr = "localhost:1337".parse().unwrap();
+    let addr: SocketAddr = "127.0.0.1:1337".parse().unwrap();
     let mut pixelflut = PixelflutClient::connect(addr).await.unwrap();
     println!("{:?}", pixelflut.dimensions().await.unwrap());
     pixelflut.set(1, 2, (255, 0, 0)).await.unwrap();
