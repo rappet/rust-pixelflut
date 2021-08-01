@@ -85,9 +85,9 @@ impl From<(u32, u32)> for Coordinate {
     }
 }
 
-impl Into<(u32, u32)> for Coordinate {
-    fn into(self) -> (u32, u32) {
-        (self.x, self.y)
+impl From<Coordinate> for (u32, u32) {
+    fn from(coordinate: Coordinate) -> (u32, u32) {
+        (coordinate.x, coordinate.y)
     }
 }
 

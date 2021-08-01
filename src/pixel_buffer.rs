@@ -175,10 +175,10 @@ impl NumberWriter {
     /// Generate a new NumberWriter
     pub fn with_decimal_size(decimal_size: usize) -> NumberWriter {
         let mut hex02 = [[0u8; 2]; 256];
-        for i in 0..=255 {
+        for (i, item) in hex02.iter_mut().enumerate() {
             let str = format!("{:02x}", i);
-            hex02[i][0] = str.as_bytes()[0];
-            hex02[i][1] = str.as_bytes()[1];
+            item[0] = str.as_bytes()[0];
+            item[1] = str.as_bytes()[1];
         }
 
         let mut decimal = Vec::new();

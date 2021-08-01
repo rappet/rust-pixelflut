@@ -40,7 +40,7 @@ impl PixelflutClient {
             let response: Response = line[0..n - 1].parse()?;
             match response {
                 Response::Size { w, h } => Ok((w, h)),
-                Response::Error(err) => Err(PixelflutErrorKind::ServerError.into()),
+                Response::Error(_err) => Err(PixelflutErrorKind::ServerError.into()),
             }
         } else {
             Err(io::Error::new(io::ErrorKind::UnexpectedEof, "expected size").into())
