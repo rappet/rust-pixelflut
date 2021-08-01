@@ -1,32 +1,21 @@
 extern crate pixelflut;
 
-use pixelflut::sync::PixelflutStream;
-use pixelflut::{Command, Response};
+use pixelflut::sync::PixelflutServerStream;
 
-use std::error::Error;
 use std::net::{SocketAddr, TcpListener, TcpStream};
 
 fn handle_client(stream: TcpStream) -> pixelflut::PixelflutResult<()> {
-    let mut stream = PixelflutStream::new(stream);
+    let mut stream = PixelflutServerStream::new(stream, (800, 600));
 
-    while let Ok(command) = stream.read() {
-        match command {
-            // The client sends a pixel
-            Command::Px(p) => println!("{}", p),
-            // The client asks for the screen size
-            Command::Size => {
-                // respond with the screen size
-                let response = Response::Size { w: 800, h: 600 };
-                stream.send_response(&response)?
-            }
-        }
+    while let Some(pixel) = stream.read_pixel()? {
+        println!("{}", pixel);
     }
 
     Ok(())
 }
 
-fn main() -> Result<(), Box<Error>> {
-    let host: SocketAddr = "127.0.0.1:1234".parse()?;
+fn main() -> anyhow::Result<()> {
+    let host: SocketAddr = "127.0.0.1:1337".parse()?;
     let listener = TcpListener::bind(host)?;
 
     for stream in listener.incoming() {

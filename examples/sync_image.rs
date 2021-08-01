@@ -1,7 +1,7 @@
 extern crate image;
 extern crate pixelflut;
 
-use pixelflut::sync::Client;
+use pixelflut::sync::PixelflutClient;
 use pixelflut::Pixel;
 
 use image::GenericImageView;
@@ -27,7 +27,7 @@ fn main() -> Result<(), Box<Error>> {
 
     let image = image::open(filename)?;
 
-    let mut client = Client::connect(host)?;
+    let mut client = PixelflutClient::connect(host)?;
 
     // get the screen size
     let (w, h) = client.size()?;
@@ -35,7 +35,7 @@ fn main() -> Result<(), Box<Error>> {
 
     // draw the image
     for (x, y, color) in image.pixels() {
-        client.set(Pixel::new((x, y), color))?;
+        client.set(x, y, color)?;
     }
 
     Ok(())

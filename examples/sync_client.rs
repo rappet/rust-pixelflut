@@ -17,8 +17,7 @@ fn main() -> anyhow::Result<()> {
     let addr: SocketAddr = opts.addr.parse()?;
     let mut client = PixelflutClient::connect(addr)?;
 
-    let (width, height) = client.dimensions().await.unwrap();
-    let (width, height) = (1920u32, 1080u32);
+    let (width, height) = client.dimensions()?;
     println!("Size: {}x{}", width, height);
 
     for h in 0..height {

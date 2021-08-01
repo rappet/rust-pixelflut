@@ -9,7 +9,7 @@ use std::net::SocketAddr;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let addr: SocketAddr = "127.0.0.1:1234".parse()?;
+    let addr: SocketAddr = "127.0.0.1:1337".parse()?;
 
     let listener = TcpListener::bind(&addr).await?;
     println!("Listening on: {}", addr);
