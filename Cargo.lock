@@ -463,7 +463,7 @@ checksum = "8d31d11c69a6b52a174b42bdc0c30e5e11670f90788b2c471c31c1d17d449443"
 
 [[package]]
 name = "pixelflut"
-version = "0.2.0-alpha.5"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "bstr",
