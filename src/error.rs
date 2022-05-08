@@ -52,7 +52,7 @@ impl PixelflutErrorKind {
         }
     }
 
-    pub(crate) fn with_description(self, description: &'static str) -> PixelflutError {
+    pub(crate) const fn with_description(self, description: &'static str) -> PixelflutError {
         PixelflutError {
             repr: Repr::Description(self, description),
         }

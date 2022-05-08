@@ -4,7 +4,7 @@ use std::fmt;
 use std::str::FromStr;
 
 use crate::error::{PixelflutError, PixelflutErrorKind, PixelflutResult};
-use crate::pixel::{Color, Coordinate, Pixel};
+use crate::pixel::Pixel;
 use std::borrow::Cow;
 
 /// A pixelflut command
@@ -14,6 +14,22 @@ use std::borrow::Cow;
 pub enum Command {
     Px(Pixel),
     Size,
+}
+
+const COMMAND_SIZE_LEN: usize = b"SIZE".len();
+const COMMAND_PX_MIN_LEN: usize = 2 + 1 + 1 + 1 + 1 + 1 + 6; // PX 1 1 000000
+const COMMAND_PX_MAX_LEN: usize = 2 + 1 + 10 + 1 + 10 + 1 + 8; // PX 1000000000 1000000000 00000000
+
+impl Command {
+    pub fn parse_byte_slice(slice: &[u8]) -> PixelflutResult<Command> {
+        match slice.len() {
+            COMMAND_SIZE_LEN if slice == b"SIZE" => Ok(Command::Size),
+            COMMAND_PX_MIN_LEN..=COMMAND_PX_MAX_LEN if slice[0..3] == *b"PX " => {
+                Ok(Command::Px(Pixel::parse_byte_slice(&slice[3..])?))
+            }
+            _ => Err(PixelflutErrorKind::InvalidCommand.into()),
+        }
+    }
 }
 
 impl fmt::Display for Command {
@@ -29,39 +45,7 @@ impl FromStr for Command {
     type Err = PixelflutError;
 
     fn from_str(s: &str) -> PixelflutResult<Command> {
-        let mut iter = s.split_whitespace();
-
-        let command = iter.next().ok_or(PixelflutErrorKind::InvalidCommand)?;
-
-        let command = match command {
-            "PX" => Command::Px(Pixel::new(
-                Coordinate::new(
-                    iter.next()
-                        .ok_or(PixelflutErrorKind::WrongNumberOfArguments)?
-                        .parse()?,
-                    iter.next()
-                        .ok_or(PixelflutErrorKind::WrongNumberOfArguments)?
-                        .parse()?,
-                ),
-                iter.next()
-                    .ok_or(PixelflutErrorKind::WrongNumberOfArguments)?
-                    .parse::<Color>()?,
-            )),
-            "SIZE" => {
-                if iter.next().is_some() {
-                    return Err(PixelflutErrorKind::WrongNumberOfArguments.into());
-                } else {
-                    Command::Size
-                }
-            }
-            _ => return Err(PixelflutErrorKind::InvalidCommand.into()),
-        };
-
-        if iter.next() == None {
-            Ok(command)
-        } else {
-            Err(PixelflutErrorKind::WrongNumberOfArguments.into())
-        }
+        Command::parse_byte_slice(s.as_bytes())
     }
 }
 
@@ -133,8 +117,34 @@ impl FromStr for Response {
 
 #[cfg(test)]
 mod test {
-    use crate::command::{Command, Response};
-    use crate::Pixel;
+    use super::*;
+    use proptest::prelude::*;
+
+    use crate::{Pixel, Color};
+
+    #[test]
+    fn command_parses() {
+        assert_eq!(Command::parse_byte_slice(b"SIZE").unwrap(), Command::Size);
+        assert_eq!(
+            Command::parse_byte_slice(b"PX 123 456 123456").unwrap(),
+            Command::Px(Pixel::new((123, 456).into(), Color::rgb(0x12, 0x34, 0x56)))
+        );
+    }
+
+    proptest! {
+        #[test]
+        fn parse_command_doesnt_crash(s in "\\PC*") {
+            let _ = Command::parse_byte_slice(s.as_bytes());
+        }
+
+        #[test]
+        fn parse_command_all_valid(s in "PX (0|[1-9][0-9]{0,8}) (0|[1-9][0-9]{0,8}) ([0-9a-fA-F]{6}|[0-9a-fA-F]{8})") {
+            assert!(Command::parse_byte_slice(s.as_bytes()).is_ok())
+        }
+    }
+
+    #[test]
+    fn response_parses() {}
 
     #[test]
     fn display() {

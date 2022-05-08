@@ -5,8 +5,6 @@ use crate::command::{Command, Response};
 use crate::error::PixelflutErrorKind;
 use crate::pixel::MAX_FORMATTED_PIXEL_SIZE_NEWLINE;
 use crate::{Pixel, PixelflutResult};
-use bstr::ByteSlice;
-use std::str::FromStr;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 pub static SERVER_READ_BUFFER_DEFAULT_CAPACITY: usize = 2 << 16;
@@ -43,7 +41,7 @@ impl PixelflutServerStream {
         loop {
             if let Some(pos) = memchr::memchr(b'\n', self.read_buf.as_ref()) {
                 let slice = &self.read_buf.as_ref()[0..pos];
-                let command = match Command::from_str(slice.to_str()?) {
+                let command = match Command::parse_byte_slice(slice) {
                     Ok(command) => command,
                     Err(err) => {
                         self.send_response(&Response::Error(err.to_string().into()))

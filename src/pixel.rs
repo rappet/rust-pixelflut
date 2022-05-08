@@ -1,4 +1,6 @@
 //! A module that contians pixels for pixelflut.
+use bstr::ByteSlice;
+
 use crate::error::{PixelflutError, PixelflutErrorKind, PixelflutResult};
 use std::fmt;
 use std::str::FromStr;
@@ -24,6 +26,16 @@ impl Pixel {
     /// construct a new `Pixel` with a `Coordinate` and a `Color`
     pub fn new(position: Coordinate, color: Color) -> Pixel {
         Pixel { position, color }
+    }
+
+    pub fn parse_byte_slice(slice: &[u8]) -> PixelflutResult<Pixel> {
+        let split_index = slice
+            .find_iter(&b" ")
+            .nth(1)
+            .ok_or(PixelflutErrorKind::WrongNumberOfArguments)?;
+        let position = Coordinate::parse_byte_slice(&slice[..split_index])?;
+        let color = Color::parse_byte_slice(&slice[split_index + 1..])?;
+        Ok(Pixel { position, color })
     }
 }
 
@@ -76,6 +88,28 @@ impl Coordinate {
     /// Constructs a new `Coordinate` with given x and y position.
     pub fn new(x: u32, y: u32) -> Coordinate {
         Coordinate { x, y }
+    }
+
+    pub fn parse_byte_slice(slice: &[u8]) -> PixelflutResult<Coordinate> {
+        let mut it = slice.splitn(2, |b| *b == b' ');
+        // TODO replace decimal parsing with something faster
+        let x: u32 = it
+            .next()
+            .ok_or(
+                PixelflutErrorKind::Parse
+                    .with_description("First coordinate from pixel is missing"),
+            )?
+            .to_str()?
+            .parse()?;
+        let y: u32 = it
+            .next()
+            .ok_or(
+                PixelflutErrorKind::Parse
+                    .with_description("Second coordinate from pixel is missing"),
+            )?
+            .to_str()?
+            .parse()?;
+        Ok(Coordinate { x, y })
     }
 }
 
@@ -137,6 +171,36 @@ impl Color {
             g,
             b,
             a: Some(a),
+        }
+    }
+
+    pub fn parse_byte_slice(slice: &[u8]) -> PixelflutResult<Color> {
+        match slice.len() {
+            6 => {
+                let r = parse_hex_byte(&slice[0..2]);
+                let g = parse_hex_byte(&slice[2..4]);
+                let b = parse_hex_byte(&slice[4..6]);
+
+                match (r, g, b) {
+                    (Some(r), Some(g), Some(b)) => Ok(Color::rgb(r, g, b)),
+                    _ => Err(PixelflutErrorKind::Parse
+                        .with_description("Could not parse hex value in RGB color code")),
+                }
+            }
+            8 => {
+                let r = parse_hex_byte(&slice[0..2]);
+                let g = parse_hex_byte(&slice[2..4]);
+                let b = parse_hex_byte(&slice[4..6]);
+                let a = parse_hex_byte(&slice[6..8]);
+                match (r, g, b, a) {
+                    (Some(r), Some(g), Some(b), Some(a)) => Ok(Color::rgba(r, g, b, a)),
+                    _ => Err(PixelflutErrorKind::Parse
+                        .with_description("Could not parse hex value in RGBA color code")),
+                }
+            }
+            _ => Err(PixelflutErrorKind::Parse.with_description(
+                "Color has wrong length. Falid formats are [0-9a-fA-F]{6}|[0-9a-fA-F]{8}",
+            )),
         }
     }
 
@@ -218,6 +282,28 @@ impl Color {
     }
 }
 
+#[inline]
+const fn parse_hex_byte(slice: &[u8]) -> Option<u8> {
+    #[inline]
+    const fn parse_hex_nibble(nibble: u8) -> Option<u8> {
+        match nibble {
+            b'0'..=b'9' => Some(nibble - b'0'),
+            b'a'..=b'f' => Some(nibble - b'a' + 10),
+            b'A'..=b'F' => Some(nibble - b'A' + 10),
+            _ => None,
+        }
+    }
+
+    if slice.len() == 2 {
+        match (parse_hex_nibble(slice[0]), parse_hex_nibble(slice[1])) {
+            (Some(hi), Some(lo)) => Some((hi << 4) | lo),
+            _ => None,
+        }
+    } else {
+        None
+    }
+}
+
 impl From<(u8, u8, u8)> for Color {
     /// Returns a RGB Color
     fn from(color: (u8, u8, u8)) -> Color {
@@ -294,20 +380,7 @@ impl FromStr for Color {
     /// assert!("112g33".parse::<Color>().is_err());
     /// ```
     fn from_str(s: &str) -> PixelflutResult<Color> {
-        match s.len() {
-            6 => Ok(Color::rgb(
-                u8::from_str_radix(&s[0..2], 16)?,
-                u8::from_str_radix(&s[2..4], 16)?,
-                u8::from_str_radix(&s[4..6], 16)?,
-            )),
-            8 => Ok(Color::rgba(
-                u8::from_str_radix(&s[0..2], 16)?,
-                u8::from_str_radix(&s[2..4], 16)?,
-                u8::from_str_radix(&s[4..6], 16)?,
-                u8::from_str_radix(&s[6..8], 16)?,
-            )),
-            _ => Err(PixelflutErrorKind::Parse.with_description("color length is wrong")),
-        }
+        Color::parse_byte_slice(s.as_bytes())
     }
 }
 
@@ -328,14 +401,92 @@ impl fmt::Debug for Color {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Color, Coordinate, Pixel};
+    use super::*;
+    use proptest::prelude::*;
 
     #[test]
-    fn test_pixel_from_str() {
+    fn pixel_parses() {
         assert_eq!(
             Pixel::new(Coordinate::new(10, 20), Color::rgb(0x11, 0x22, 0x33),),
-            "10 20 112233".parse().unwrap()
+            Pixel::parse_byte_slice(b"10 20 112233").unwrap()
         );
+    }
+
+    proptest! {
+        #[test]
+        fn parse_pixel_doesnt_crash(s in "\\PC*") {
+            let _ = Pixel::parse_byte_slice(s.as_bytes());
+        }
+
+        #[test]
+        fn parse_pixel_all_valid(s in "(0|[1-9][0-9]{0,8}) (0|[1-9][0-9]{0,8}) ([0-9a-fA-F]{6}|[0-9a-fA-F]{8})") {
+            assert!(Pixel::parse_byte_slice(s.as_bytes()).is_ok())
+        }
+    }
+
+    #[test]
+    fn coordinate_parses() {
+        assert_eq!(
+            Coordinate::parse_byte_slice(b"0 0").unwrap(),
+            Coordinate::new(0, 0)
+        );
+        assert_eq!(
+            Coordinate::parse_byte_slice(b"1 2").unwrap(),
+            Coordinate::new(1, 2)
+        );
+        assert_eq!(
+            Coordinate::parse_byte_slice(b"1234 2345").unwrap(),
+            Coordinate::new(1234, 2345)
+        );
+        assert_eq!(
+            Coordinate::parse_byte_slice(b"1000000000 1000000000").unwrap(),
+            Coordinate::new(1000000000, 1000000000)
+        );
+    }
+
+    proptest! {
+        #[test]
+        fn parse_coordinate_doesnt_crash(s in "\\PC*") {
+            let _ = Coordinate::parse_byte_slice(s.as_bytes());
+        }
+
+        #[test]
+        fn parse_coordinate_all_valid(s in "(0|[1-9][0-9]{0,8}) (0|[1-9][0-9]{0,8})") {
+            assert!(Coordinate::parse_byte_slice(s.as_bytes()).is_ok())
+        }
+    }
+
+    #[test]
+    fn color_parses() {
+        assert_eq!(
+            Color::parse_byte_slice(b"000000").unwrap(),
+            Color::rgb(0, 0, 0)
+        );
+        assert_eq!(
+            Color::parse_byte_slice(b"00000000").unwrap(),
+            Color::rgba(0, 0, 0, 0)
+        );
+        assert_eq!(
+            Color::parse_byte_slice(b"123456").unwrap(),
+            Color::rgb(0x12, 0x34, 0x56)
+        );
+        assert_eq!(
+            Color::parse_byte_slice(b"123456Ab").unwrap(),
+            Color::rgba(0x12, 0x34, 0x56, 0xab)
+        );
+        assert!(Color::parse_byte_slice(b"").is_err());
+    }
+
+    proptest! {
+        #[test]
+        fn parse_color_doesnt_crash(s in "\\PC*") {
+            let _ = Color::parse_byte_slice(s.as_bytes());
+        }
+
+        #[test]
+        fn parse_color_all_valid(s in "[0-9a-fA-F]{6}|[0-9a-fA-F]{8}") {
+            assert!(Color::parse_byte_slice(s.as_bytes()).is_ok())
+        }
     }
 
     #[test]
@@ -374,5 +525,27 @@ mod tests {
             (0x11, 0x22, 0x33, 0x44),
             Color::rgba(0x11, 0x22, 0x33, 0x44).normalized()
         );
+    }
+
+    #[test]
+    fn hex_byte_parses() {
+        assert_eq!(parse_hex_byte(b"12"), Some(0x12));
+        assert_eq!(parse_hex_byte(b"a0"), Some(0xa0));
+        assert_eq!(parse_hex_byte(b"A0"), Some(0xa0));
+        assert_eq!(parse_hex_byte(b"00"), Some(0x00));
+        assert_eq!(parse_hex_byte(b"1"), None);
+        assert_eq!(parse_hex_byte(b"123"), None);
+    }
+
+    proptest! {
+        #[test]
+        fn parse_hex_bytes_doesnt_crash(s in "\\PC*") {
+            let _ = parse_hex_byte(s.as_bytes());
+        }
+
+        #[test]
+        fn parse_hex_bytes_all_valid(s in "[0-9a-fA-F]{2}") {
+            assert!(parse_hex_byte(s.as_bytes()).is_some())
+        }
     }
 }
