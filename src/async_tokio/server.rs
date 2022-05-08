@@ -55,14 +55,12 @@ impl PixelflutServerStream {
                 return Ok(Some(command));
             } else if self.read_buf.len() > MAX_FORMATTED_PIXEL_SIZE_NEWLINE {
                 return Err(PixelflutErrorKind::Io.with_description("line is to long"));
-            } else {
-                if self.stream.read_buf(&mut self.read_buf).await? == 0 {
-                    return if self.read_buf.is_empty() {
-                        Ok(None)
-                    } else {
-                        Err(PixelflutErrorKind::Io.with_description("Unexpected end of stream"))
-                    };
-                }
+            } else if self.stream.read_buf(&mut self.read_buf).await? == 0 {
+                return if self.read_buf.is_empty() {
+                    Ok(None)
+                } else {
+                    Err(PixelflutErrorKind::Io.with_description("Unexpected end of stream"))
+                };
             }
         }
     }
