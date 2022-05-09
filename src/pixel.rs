@@ -24,18 +24,19 @@ pub struct Pixel {
 
 impl Pixel {
     /// construct a new `Pixel` with a `Coordinate` and a `Color`
-    pub fn new(position: Coordinate, color: Color) -> Pixel {
-        Pixel { position, color }
+    #[must_use]
+    pub fn new(position: Coordinate, color: Color) -> Self {
+        Self { position, color }
     }
 
-    pub fn parse_byte_slice(slice: &[u8]) -> PixelflutResult<Pixel> {
+    pub fn parse_byte_slice(slice: &[u8]) -> PixelflutResult<Self> {
         let split_index = slice
             .find_iter(&b" ")
             .nth(1)
             .ok_or(PixelflutErrorKind::WrongNumberOfArguments)?;
         let position = Coordinate::parse_byte_slice(&slice[..split_index])?;
         let color = Color::parse_byte_slice(&slice[split_index + 1..])?;
-        Ok(Pixel { position, color })
+        Ok(Self { position, color })
     }
 }
 
@@ -48,9 +49,9 @@ impl fmt::Display for Pixel {
 impl FromStr for Pixel {
     type Err = PixelflutError;
 
-    fn from_str(s: &str) -> PixelflutResult<Pixel> {
+    fn from_str(s: &str) -> PixelflutResult<Self> {
         let mut iter = s.split_whitespace();
-        let pixel = Pixel::new(
+        let pixel = Self::new(
             Coordinate::new(
                 iter.next()
                     .ok_or(PixelflutErrorKind::WrongNumberOfArguments)?
@@ -73,7 +74,7 @@ impl FromStr for Pixel {
 
 impl<P: Into<Coordinate>, C: Into<Color>> From<(P, C)> for Pixel {
     fn from((position, color): (P, C)) -> Self {
-        Pixel::new(position.into(), color.into())
+        Self::new(position.into(), color.into())
     }
 }
 
@@ -86,11 +87,12 @@ pub struct Coordinate {
 
 impl Coordinate {
     /// Constructs a new `Coordinate` with given x and y position.
-    pub fn new(x: u32, y: u32) -> Coordinate {
-        Coordinate { x, y }
+    #[must_use]
+    pub fn new(x: u32, y: u32) -> Self {
+        Self { x, y }
     }
 
-    pub fn parse_byte_slice(slice: &[u8]) -> PixelflutResult<Coordinate> {
+    pub fn parse_byte_slice(slice: &[u8]) -> PixelflutResult<Self> {
         let mut it = slice.splitn(2, |b| *b == b' ');
         // TODO replace decimal parsing with something faster
         let x: u32 = atoi::atoi(it.next().ok_or(
@@ -101,13 +103,13 @@ impl Coordinate {
             PixelflutErrorKind::Parse.with_description("Second coordinate from pixel is missing"),
         )?)
         .ok_or(PixelflutErrorKind::Parse.with_description("Failed parsing second coordinate"))?;
-        Ok(Coordinate { x, y })
+        Ok(Self { x, y })
     }
 }
 
 impl From<(u32, u32)> for Coordinate {
-    fn from(coordinate: (u32, u32)) -> Coordinate {
-        Coordinate::new(coordinate.0, coordinate.1)
+    fn from(coordinate: (u32, u32)) -> Self {
+        Self::new(coordinate.0, coordinate.1)
     }
 }
 
@@ -143,8 +145,9 @@ impl Color {
     /// use pixelflut::Color;
     /// Color::rgb(255, 255, 255);
     /// ```
-    pub const fn rgb(r: u8, g: u8, b: u8) -> Color {
-        Color { r, g, b, a: None }
+    #[must_use]
+    pub const fn rgb(r: u8, g: u8, b: u8) -> Self {
+        Self { r, g, b, a: None }
     }
 
     /// Constructs a new `Color` using an alpha channel.
@@ -157,8 +160,9 @@ impl Color {
     /// use pixelflut::Color;
     /// Color::rgba(255, 255, 255, 255);
     /// ```
-    pub const fn rgba(r: u8, g: u8, b: u8, a: u8) -> Color {
-        Color {
+    #[must_use]
+    pub const fn rgba(r: u8, g: u8, b: u8, a: u8) -> Self {
+        Self {
             r,
             g,
             b,
@@ -166,7 +170,7 @@ impl Color {
         }
     }
 
-    pub fn parse_byte_slice(slice: &[u8]) -> PixelflutResult<Color> {
+    pub fn parse_byte_slice(slice: &[u8]) -> PixelflutResult<Self> {
         match slice.len() {
             6 => {
                 let r = parse_hex_byte(&slice[0..2]);
@@ -174,7 +178,7 @@ impl Color {
                 let b = parse_hex_byte(&slice[4..6]);
 
                 match (r, g, b) {
-                    (Some(r), Some(g), Some(b)) => Ok(Color::rgb(r, g, b)),
+                    (Some(r), Some(g), Some(b)) => Ok(Self::rgb(r, g, b)),
                     _ => Err(PixelflutErrorKind::Parse
                         .with_description("Could not parse hex value in RGB color code")),
                 }
@@ -185,7 +189,7 @@ impl Color {
                 let b = parse_hex_byte(&slice[4..6]);
                 let a = parse_hex_byte(&slice[6..8]);
                 match (r, g, b, a) {
-                    (Some(r), Some(g), Some(b), Some(a)) => Ok(Color::rgba(r, g, b, a)),
+                    (Some(r), Some(g), Some(b), Some(a)) => Ok(Self::rgba(r, g, b, a)),
                     _ => Err(PixelflutErrorKind::Parse
                         .with_description("Could not parse hex value in RGBA color code")),
                 }
@@ -211,6 +215,7 @@ impl Color {
     /// let with_alpha = Color::rgba(123, 123, 123, 123);
     /// assert_eq!(with_alpha.alpha(), 123)
     /// ```
+    #[must_use]
     pub const fn alpha(self) -> u8 {
         if let Some(alpha) = self.a {
             alpha
@@ -230,10 +235,11 @@ impl Color {
     /// assert_eq!(Color::packed(123, 23, 42, 255), Color::rgb(123, 23, 42));
     /// assert_eq!(Color::packed(123, 23, 42, 64), Color::rgba(123, 23, 42, 64));
     /// ```
-    pub const fn packed(r: u8, g: u8, b: u8, a: u8) -> Color {
+    #[must_use]
+    pub const fn packed(r: u8, g: u8, b: u8, a: u8) -> Self {
         match a {
-            255 => Color::rgb(r, g, b),
-            a => Color::rgba(r, g, b, a),
+            255 => Self::rgb(r, g, b),
+            a => Self::rgba(r, g, b, a),
         }
     }
 
@@ -249,9 +255,10 @@ impl Color {
     /// assert_eq!(Color::rgb(12, 34, 56).pack(), Color::rgb(12, 34, 56));
     /// assert_eq!(Color::rgba(12, 34, 56, 78).pack(), Color::rgba(12, 34, 56, 78));
     /// ```
-    pub const fn pack(&self) -> Color {
+    #[must_use]
+    pub const fn pack(&self) -> Self {
         match self.a {
-            None | Some(255) => Color::rgb(self.r, self.g, self.b),
+            None | Some(255) => Self::rgb(self.r, self.g, self.b),
             _ => *self,
         }
     }
@@ -266,6 +273,7 @@ impl Color {
     /// use pixelflut::Color;
     /// assert_eq!((255, 0, 0, 255), Color::rgb(255, 0, 0).normalized())
     /// ```
+    #[must_use]
     pub const fn normalized(self) -> (u8, u8, u8, u8) {
         match self.a {
             Some(a) => (self.r, self.g, self.b, a),
@@ -298,15 +306,15 @@ const fn parse_hex_byte(slice: &[u8]) -> Option<u8> {
 
 impl From<(u8, u8, u8)> for Color {
     /// Returns a RGB Color
-    fn from(color: (u8, u8, u8)) -> Color {
-        Color::rgb(color.0, color.1, color.2)
+    fn from(color: (u8, u8, u8)) -> Self {
+        Self::rgb(color.0, color.1, color.2)
     }
 }
 
 impl From<(u8, u8, u8, u8)> for Color {
     /// Returns a RGBA Color
-    fn from(color: (u8, u8, u8, u8)) -> Color {
-        Color::rgba(color.0, color.1, color.2, color.3)
+    fn from(color: (u8, u8, u8, u8)) -> Self {
+        Self::rgba(color.0, color.1, color.2, color.3)
     }
 }
 
@@ -371,8 +379,8 @@ impl FromStr for Color {
     /// assert!(" 1 2 3".parse::<Color>().is_err());
     /// assert!("112g33".parse::<Color>().is_err());
     /// ```
-    fn from_str(s: &str) -> PixelflutResult<Color> {
-        Color::parse_byte_slice(s.as_bytes())
+    fn from_str(s: &str) -> PixelflutResult<Self> {
+        Self::parse_byte_slice(s.as_bytes())
     }
 }
 
@@ -432,7 +440,7 @@ mod tests {
         );
         assert_eq!(
             Coordinate::parse_byte_slice(b"1000000000 1000000000").unwrap(),
-            Coordinate::new(1000000000, 1000000000)
+            Coordinate::new(1_000_000_000, 1_000_000_000)
         );
     }
 

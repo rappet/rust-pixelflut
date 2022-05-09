@@ -12,9 +12,9 @@ pub struct PixelflutClient {
 
 impl PixelflutClient {
     /// Connect to a Pixelflut server.
-    pub async fn connect(addr: impl ToSocketAddrs) -> PixelflutResult<PixelflutClient> {
+    pub async fn connect(addr: impl ToSocketAddrs) -> PixelflutResult<Self> {
         let stream = TcpStream::connect(addr).await?;
-        Ok(PixelflutClient {
+        Ok(Self {
             stream: BufReader::new(stream),
             write_buf: PixelBuffer::new(),
         })

@@ -21,11 +21,11 @@ const COMMAND_PX_MIN_LEN: usize = 2 + 1 + 1 + 1 + 1 + 1 + 6; // PX 1 1 000000
 const COMMAND_PX_MAX_LEN: usize = 2 + 1 + 10 + 1 + 10 + 1 + 8; // PX 1000000000 1000000000 00000000
 
 impl Command {
-    pub fn parse_byte_slice(slice: &[u8]) -> PixelflutResult<Command> {
+    pub fn parse_byte_slice(slice: &[u8]) -> PixelflutResult<Self> {
         match slice.len() {
-            COMMAND_SIZE_LEN if slice == b"SIZE" => Ok(Command::Size),
+            COMMAND_SIZE_LEN if slice == b"SIZE" => Ok(Self::Size),
             COMMAND_PX_MIN_LEN..=COMMAND_PX_MAX_LEN if slice[0..3] == *b"PX " => {
-                Ok(Command::Px(Pixel::parse_byte_slice(&slice[3..])?))
+                Ok(Self::Px(Pixel::parse_byte_slice(&slice[3..])?))
             }
             _ => Err(PixelflutErrorKind::InvalidCommand.into()),
         }
@@ -36,7 +36,7 @@ impl fmt::Display for Command {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Command::Px(ref pixel) => write!(f, "PX {}", pixel),
-            Command::Size => write!(f, "SIZE"),
+            Self::Size => write!(f, "SIZE"),
         }
     }
 }
@@ -44,14 +44,14 @@ impl fmt::Display for Command {
 impl FromStr for Command {
     type Err = PixelflutError;
 
-    fn from_str(s: &str) -> PixelflutResult<Command> {
-        Command::parse_byte_slice(s.as_bytes())
+    fn from_str(s: &str) -> PixelflutResult<Self> {
+        Self::parse_byte_slice(s.as_bytes())
     }
 }
 
 impl From<Pixel> for Command {
-    fn from(pixel: Pixel) -> Command {
-        Command::Px(pixel)
+    fn from(pixel: Pixel) -> Self {
+        Self::Px(pixel)
     }
 }
 
@@ -67,7 +67,7 @@ pub enum Response {
 
 impl fmt::Display for Response {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use Response::*;
+        use Response::{Error, Size};
         match self {
             Size { w, h } => write!(f, "SIZE {} {}", w, h),
             Error(msg) => write!(f, "ERROR {}", msg),
@@ -78,7 +78,7 @@ impl fmt::Display for Response {
 impl FromStr for Response {
     type Err = PixelflutError;
 
-    fn from_str(s: &str) -> PixelflutResult<Response> {
+    fn from_str(s: &str) -> PixelflutResult<Self> {
         let mut iter = s.split_whitespace();
 
         let command = iter.next().ok_or(PixelflutErrorKind::InvalidCommand)?;
@@ -86,7 +86,7 @@ impl FromStr for Response {
         let command = match command {
             "SIZE" => {
                 if let Some(w) = iter.next() {
-                    Response::Size {
+                    Self::Size {
                         w: w.parse()?,
                         h: iter
                             .next()
@@ -99,7 +99,7 @@ impl FromStr for Response {
             }
             "ERROR" => {
                 if s.len() > 6 {
-                    Response::Error(Cow::Owned(s[6..].into()))
+                    Self::Error(Cow::Owned(s[6..].into()))
                 } else {
                     return Err(PixelflutErrorKind::WrongNumberOfArguments.into());
                 }

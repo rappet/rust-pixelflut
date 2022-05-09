@@ -17,20 +17,12 @@ pub struct PixelflutServerStream {
 }
 
 impl PixelflutServerStream {
-    pub fn new(stream: TcpStream, dimensions: (u32, u32)) -> PixelflutServerStream {
-        PixelflutServerStream::with_capacity(
-            stream,
-            dimensions,
-            SERVER_READ_BUFFER_DEFAULT_CAPACITY,
-        )
+    pub fn new(stream: TcpStream, dimensions: (u32, u32)) -> Self {
+        Self::with_capacity(stream, dimensions, SERVER_READ_BUFFER_DEFAULT_CAPACITY)
     }
 
-    pub fn with_capacity(
-        stream: TcpStream,
-        dimensions: (u32, u32),
-        capacity: usize,
-    ) -> PixelflutServerStream {
-        PixelflutServerStream {
+    pub fn with_capacity(stream: TcpStream, dimensions: (u32, u32), capacity: usize) -> Self {
+        Self {
             stream,
             read_buf: BytesMut::with_capacity(capacity),
             dimensions,

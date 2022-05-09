@@ -9,7 +9,7 @@ pub static PIXEL_BUFFER_DEFAULT_CAPACITY: usize = 8 * 1024;
 /// Pixel buffer is a byte buffer that guarantees to contain valid pixelflut data.
 /// It is used as an internal buffer for the sync and async clients and
 /// can also be used for pre-format an array of pixels,
-/// as the PixelBuffer can direclty be send with a client.
+/// as the `PixelBuffer` can direclty be send with a client.
 ///
 /// # Examples
 ///
@@ -43,25 +43,25 @@ pub struct PixelBuffer {
 }
 
 impl PixelBuffer {
-    /// Constructs a new PixelBuffer with the specified capacity.
+    /// Constructs a new `PixelBuffer` with the specified capacity.
     ///
     /// The capacity is given in bytes. If you need a Capacity in Pixels,
-    /// consider [with_capacity_pixels].
-    ///
-    /// [with_capacity_pixels]: Self::with_capacity_pixels
-    pub fn with_capacity(capacity: usize) -> PixelBuffer {
-        PixelBuffer {
+    /// consider [`Self::with_capacity_pixels`].
+    #[must_use]
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
             buffer: Vec::with_capacity(capacity),
             number_writer: NumberWriter::default(),
         }
     }
 
-    /// Constructs a new PixelfBuffer with the specified estimated capacity in Pixels.
+    /// Constructs a new `PixelfBuffer` with the specified estimated capacity in Pixels.
     ///
     /// The capacity is given in pixels.
     /// The actual capacity would be higher in most cases,
     /// as the worst-cases length of a formated Pixel is used.
-    pub fn with_capacity_pixels(pixels: usize) -> PixelBuffer {
+    #[must_use]
+    pub fn with_capacity_pixels(pixels: usize) -> Self {
         Self::with_capacity(pixels * MAX_FORMATTED_PIXEL_SIZE_NEWLINE)
     }
 

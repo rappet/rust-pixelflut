@@ -56,11 +56,10 @@ impl PixelflutClient {
     /// Writes a Pixel to the server.
     ///
     /// A buffered stream is used for sending.
-    /// The pixel is only send if the buffer is full or [flush] is called.
+    /// The pixel is only send if the buffer is full or [`Self::flush`] is called.
     ///
     /// # Errors
     /// Failing if the underling socket is failing.
-    /// [flush]: `Self::flush`
     pub fn set(&mut self, x: u32, y: u32, color: impl Into<Color>) -> PixelflutResult<()> {
         let pixel = Pixel::new((x, y).into(), color.into());
         self.stream
