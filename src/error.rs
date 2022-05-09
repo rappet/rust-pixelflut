@@ -11,6 +11,7 @@ pub type PixelflutResult<T> = result::Result<T, PixelflutError>;
 /// Pixelflut error type
 ///
 /// Use [`PixelflutErrorKind`] to match specific errors.
+#[allow(clippy::module_name_repetitions)]
 pub struct PixelflutError {
     repr: Repr,
 }

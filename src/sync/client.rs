@@ -10,6 +10,7 @@ use crate::pixel::Pixel;
 use crate::{Color, PixelflutResult};
 
 /// Sync Pixelflut client.
+#[allow(clippy::module_name_repetitions)]
 pub struct PixelflutClient {
     stream: BufStream<TcpStream>,
 }

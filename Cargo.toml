@@ -11,6 +11,7 @@ An async/sync Pixelflut server/client library
 homepage = "https://github.com/rappet/rust-pixelflut"
 repository = "https://github.com/rappet/rust-pixelflut"
 keywords = ["pixelflut"]
+categories = ["graphics", "network-programming"]
 
 [features]
 all = ["tokio-rt", "sync"]

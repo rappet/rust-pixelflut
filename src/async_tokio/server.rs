@@ -41,7 +41,8 @@ impl PixelflutServerStream {
                         return Err(err);
                     }
                 };
-                let _ = self.read_buf.split_to(pos + 1);
+                // skips the read bytes
+                let _already_read = self.read_buf.split_to(pos + 1);
                 return Ok(Some(command));
             } else if self.read_buf.len() > MAX_FORMATTED_PIXEL_SIZE_NEWLINE {
                 return Err(PixelflutErrorKind::Io.with_description("line is to long"));

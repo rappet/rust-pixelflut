@@ -5,6 +5,7 @@ use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::{TcpStream, ToSocketAddrs};
 
 /// Async Pixelflut client.
+#[allow(clippy::module_name_repetitions)]
 pub struct PixelflutClient {
     stream: BufReader<TcpStream>,
     write_buf: PixelBuffer,

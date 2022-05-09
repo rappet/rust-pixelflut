@@ -128,6 +128,8 @@ impl PixelBuffer {
     /// buffer.write_pixel(&Pixel::new((13, 34).into(), (255, 0, 10).into()));
     /// assert_eq!(buffer.as_slice(), b"PX 12 34 ff000a\nPX 13 34 ff000a\n")
     /// ```
+    // This will not panic
+    #[allow(clippy::missing_panics_doc)]
     pub fn write_pixel(&mut self, pixel: &Pixel) {
         let (x, y) = pixel.position.into();
         let color = pixel.color;
