@@ -93,22 +93,14 @@ impl Coordinate {
     pub fn parse_byte_slice(slice: &[u8]) -> PixelflutResult<Coordinate> {
         let mut it = slice.splitn(2, |b| *b == b' ');
         // TODO replace decimal parsing with something faster
-        let x: u32 = it
-            .next()
-            .ok_or(
-                PixelflutErrorKind::Parse
-                    .with_description("First coordinate from pixel is missing"),
-            )?
-            .to_str()?
-            .parse()?;
-        let y: u32 = it
-            .next()
-            .ok_or(
-                PixelflutErrorKind::Parse
-                    .with_description("Second coordinate from pixel is missing"),
-            )?
-            .to_str()?
-            .parse()?;
+        let x: u32 = atoi::atoi(it.next().ok_or(
+            PixelflutErrorKind::Parse.with_description("First coordinate from pixel is missing"),
+        )?)
+        .ok_or(PixelflutErrorKind::Parse.with_description("Failed parsing first coordinate"))?;
+        let y: u32 = atoi::atoi(it.next().ok_or(
+            PixelflutErrorKind::Parse.with_description("Second coordinate from pixel is missing"),
+        )?)
+        .ok_or(PixelflutErrorKind::Parse.with_description("Failed parsing second coordinate"))?;
         Ok(Coordinate { x, y })
     }
 }

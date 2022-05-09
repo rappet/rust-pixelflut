@@ -120,7 +120,7 @@ mod test {
     use super::*;
     use proptest::prelude::*;
 
-    use crate::{Pixel, Color};
+    use crate::{Color, Pixel};
 
     #[test]
     fn command_parses() {

@@ -39,6 +39,7 @@ name = "async_client"
 required-features = ["tokio-rt", "anyhow", "clap"]
 
 [dependencies]
+atoi = "1.0.0"
 bufstream = { version = "0.1.4", optional = true }
 bstr = "0.2.17"
 bytes = "1.1.0"
