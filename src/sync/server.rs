@@ -33,8 +33,9 @@ pub struct PixelflutServerStream {
 
 impl PixelflutServerStream {
     /// Creates a new `PixelflutStream` from a `TcpStream`.
-    pub fn new(stream: TcpStream, dimensions: (u32, u32)) -> PixelflutServerStream {
-        PixelflutServerStream {
+    #[must_use]
+    pub fn new(stream: TcpStream, dimensions: (u32, u32)) -> Self {
+        Self {
             reader: BufReader::new(stream),
             dimensions,
         }
@@ -59,6 +60,14 @@ impl PixelflutServerStream {
         Ok(Some(line[0..line.len()].parse()?))
     }
 
+    /// Read the next pixel from the client.
+    ///
+    /// This will automatically respond to "SIZE" requests.
+    /// Returns `None` if the stream got closed.
+    ///
+    /// # Errors
+    /// Failing if the underlying socket is failing or the client is sending
+    /// a malformed command.
     pub fn read_pixel(&mut self) -> PixelflutResult<Option<Pixel>> {
         loop {
             match self.read_command()? {

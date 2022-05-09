@@ -65,12 +65,14 @@ impl PixelBuffer {
         Self::with_capacity(pixels * MAX_FORMATTED_PIXEL_SIZE_NEWLINE)
     }
 
-    /// Creates a new PixelBuffer with the default capacity.
-    pub fn new() -> PixelBuffer {
+    /// Creates a new `PixelBuffer` with the default capacity.
+    #[must_use]
+    pub fn new() -> Self {
         Self::with_capacity(PIXEL_BUFFER_DEFAULT_CAPACITY)
     }
 
     /// Extracts a slice containing the entire internal buffer.
+    #[must_use]
     pub fn as_slice(&self) -> &[u8] {
         self.as_ref()
     }
@@ -86,6 +88,7 @@ impl PixelBuffer {
     /// buffer.write_pixel(&Pixel::default());
     /// assert_eq!(buffer.is_empty(), false);
     /// ```
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.buffer.is_empty()
     }
@@ -93,6 +96,7 @@ impl PixelBuffer {
     /// Returns `true`, if the internal buffer is so large,
     /// that the buffer might need to be resized,
     /// if another pixel is added.
+    #[must_use]
     pub fn is_capacity_reached(&self) -> bool {
         self.buffer.capacity() < self.buffer.len() + MAX_FORMATTED_PIXEL_SIZE_NEWLINE
     }
@@ -154,8 +158,8 @@ impl PixelBuffer {
 }
 
 impl Default for PixelBuffer {
-    fn default() -> PixelBuffer {
-        PixelBuffer::new()
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -167,8 +171,8 @@ impl AsRef<[u8]> for PixelBuffer {
 
 impl<P: Into<Pixel>> FromIterator<P> for PixelBuffer {
     fn from_iter<T: IntoIterator<Item = P>>(iter: T) -> Self {
-        let mut buffer = PixelBuffer::new();
-        for pixel in iter.into_iter() {
+        let mut buffer = Self::new();
+        for pixel in iter {
             buffer.write_pixel(&pixel.into());
         }
         buffer
@@ -188,8 +192,8 @@ struct NumberWriter {
 }
 
 impl NumberWriter {
-    /// Generate a new NumberWriter
-    pub fn with_decimal_size(decimal_size: usize) -> NumberWriter {
+    /// Generate a new `NumberWriter`
+    pub fn with_decimal_size(decimal_size: usize) -> Self {
         let mut hex02 = [[0u8; 2]; 256];
         for (i, item) in hex02.iter_mut().enumerate() {
             let str = format!("{:02x}", i);
@@ -202,14 +206,14 @@ impl NumberWriter {
             decimal.push(format!("{}", i));
         }
 
-        NumberWriter {
+        Self {
             hex02: Arc::new(hex02),
             decimal: Arc::new(decimal),
         }
     }
 
-    /// Generate a NumberWriter with default parameters
-    pub(crate) fn create() -> NumberWriter {
+    /// Generate a `NumberWriter` with default parameters
+    pub(crate) fn create() -> Self {
         Self::with_decimal_size(NUMBER_WRITER_DEFAULT_MAX_DECIMAL)
     }
 

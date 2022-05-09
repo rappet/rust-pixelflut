@@ -15,10 +15,13 @@ pub struct PixelflutClient {
 }
 
 impl PixelflutClient {
-    /// connects to a Pixelflut host at address `addr`
-    pub fn connect(addr: impl ToSocketAddrs) -> PixelflutResult<PixelflutClient> {
+    /// Connects to a Pixelflut host at address `addr`
+    ///
+    /// # Errors
+    /// Failes if the TCP connection failes.
+    pub fn connect(addr: impl ToSocketAddrs) -> PixelflutResult<Self> {
         let stream = TcpStream::connect(addr)?;
-        Ok(PixelflutClient {
+        Ok(Self {
             stream: BufStream::new(stream),
         })
     }
@@ -31,6 +34,9 @@ impl PixelflutClient {
     ///
     /// # Returns
     /// Ok((width, height)) on success
+    ///
+    /// # Errors
+    /// Failes if the response is malformed or the socket failes.
     pub fn dimensions(&mut self) -> PixelflutResult<(u32, u32)> {
         self.stream.write_fmt(format_args!("{}\n", Command::Size))?;
         self.stream.flush()?;
@@ -52,7 +58,9 @@ impl PixelflutClient {
     /// A buffered stream is used for sending.
     /// The pixel is only send if the buffer is full or [flush] is called.
     ///
-    /// [flush]: Self::flush
+    /// # Errors
+    /// Failing if the underling socket is failing.
+    /// [flush]: `Self::flush`
     pub fn set(&mut self, x: u32, y: u32, color: impl Into<Color>) -> PixelflutResult<()> {
         let pixel = Pixel::new((x, y).into(), color.into());
         self.stream
@@ -61,6 +69,9 @@ impl PixelflutClient {
     }
 
     /// Flushes the internal buffer to the server.
+    ///
+    /// # Errors
+    /// Failing if the underlying writer files.
     pub fn flush(&mut self) -> PixelflutResult<()> {
         self.stream.flush()?;
         Ok(())
