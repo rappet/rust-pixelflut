@@ -61,6 +61,14 @@ impl PixelflutServerStream {
         Ok(())
     }
 
+    /// Read the next pixel from the client.
+    ///
+    /// This will automatically respond to "SIZE" requests.
+    /// Returns `None` if the stream got closed.
+    ///
+    /// # Errors
+    /// Failing if the underlying socket is failing or the client is sending
+    /// a malformed command.
     pub async fn read_pixel(&mut self) -> PixelflutResult<Option<Pixel>> {
         loop {
             match self.read_command().await? {
@@ -70,7 +78,7 @@ impl PixelflutServerStream {
                         w: self.dimensions.0,
                         h: self.dimensions.1,
                     })
-                    .await?
+                    .await?;
                 }
                 None => return Ok(None),
             }

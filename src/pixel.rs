@@ -25,10 +25,14 @@ pub struct Pixel {
 impl Pixel {
     /// construct a new `Pixel` with a `Coordinate` and a `Color`
     #[must_use]
-    pub fn new(position: Coordinate, color: Color) -> Self {
+    pub const fn new(position: Coordinate, color: Color) -> Self {
         Self { position, color }
     }
 
+    /// Parses a ASCII/UTF-8 encoded byte slice.
+    ///
+    /// # Errors
+    /// Failes if the input is malformed.
     pub fn parse_byte_slice(slice: &[u8]) -> PixelflutResult<Self> {
         let split_index = slice
             .find_iter(&b" ")
@@ -88,10 +92,14 @@ pub struct Coordinate {
 impl Coordinate {
     /// Constructs a new `Coordinate` with given x and y position.
     #[must_use]
-    pub fn new(x: u32, y: u32) -> Self {
+    pub const fn new(x: u32, y: u32) -> Self {
         Self { x, y }
     }
 
+    /// Parses a ASCII/UTF-8 encoded byte slice.
+    ///
+    /// # Errors
+    /// Failes if the input is malformed.
     pub fn parse_byte_slice(slice: &[u8]) -> PixelflutResult<Self> {
         let mut it = slice.splitn(2, |b| *b == b' ');
         // TODO replace decimal parsing with something faster
@@ -170,6 +178,10 @@ impl Color {
         }
     }
 
+    /// Parses a ASCII/UTF-8 encoded byte slice.
+    ///
+    /// # Errors
+    /// Failes if the input is malformed.
     pub fn parse_byte_slice(slice: &[u8]) -> PixelflutResult<Self> {
         match slice.len() {
             6 => {

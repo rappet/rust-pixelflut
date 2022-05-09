@@ -12,7 +12,10 @@ pub struct PixelflutClient {
 
 impl PixelflutClient {
     /// Connect to a Pixelflut server.
-    pub async fn connect(addr: impl ToSocketAddrs) -> PixelflutResult<Self> {
+    ///
+    /// # Errors
+    /// Failes if the underlying socket could not connect.
+    pub async fn connect(addr: impl ToSocketAddrs + Send) -> PixelflutResult<Self> {
         let stream = TcpStream::connect(addr).await?;
         Ok(Self {
             stream: BufReader::new(stream),
@@ -38,10 +41,16 @@ impl PixelflutClient {
     /// Writes a Pixel to the server.
     ///
     /// A buffered stream is used for sending.
-    /// The pixel is only send if the buffer is full or [flush] is called.
+    /// The pixel is only send if the buffer is full or [`Self::flush`] is called.
     ///
-    /// [flush]: Self::flush
-    pub async fn set(&mut self, x: u32, y: u32, color: impl Into<Color>) -> PixelflutResult<()> {
+    /// # Errors
+    /// Failes if the underlying socket failes.
+    pub async fn set(
+        &mut self,
+        x: u32,
+        y: u32,
+        color: impl Into<Color> + Send,
+    ) -> PixelflutResult<()> {
         let pixel = Pixel::new((x, y).into(), color.into());
         if self.write_buf.is_capacity_reached() {
             self.flush().await?;
@@ -58,6 +67,9 @@ impl PixelflutClient {
     ///
     /// # Returns
     /// Ok((width, height)) on success
+    ///
+    /// # Errors
+    /// Failes if the response is malformed or the socket failes.
     pub async fn dimensions(&mut self) -> PixelflutResult<(u32, u32)> {
         self.write_command(&Command::Size).await?;
         let response = self.read_command().await?;
@@ -67,6 +79,13 @@ impl PixelflutClient {
         })
     }
 
+    /// Write a prepared `PixelBuffer` to the socket.
+    ///
+    /// This method has the advantage, that the encoding of the pixels can be prepared
+    /// and resend very cheap.
+    ///
+    /// # Errors
+    /// Failes if the socket failes.
     pub async fn write_buffer(&mut self, buffer: &PixelBuffer) -> PixelflutResult<()> {
         self.flush().await?;
         self.stream.write_all(buffer.as_slice()).await?;
@@ -74,6 +93,9 @@ impl PixelflutClient {
     }
 
     /// Flushes the internal buffer to the server.
+    ///
+    /// # Errors
+    /// Failes if the underlying socket failes.
     pub async fn flush(&mut self) -> PixelflutResult<()> {
         if !self.write_buf.is_empty() {
             self.stream.write_all(self.write_buf.as_slice()).await?;

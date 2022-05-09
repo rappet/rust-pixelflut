@@ -41,7 +41,7 @@ pub enum PixelflutErrorKind {
 }
 
 impl PixelflutErrorKind {
-    pub(crate) fn as_str(self) -> &'static str {
+    pub(crate) const fn as_str(self) -> &'static str {
         match self {
             Self::Io => "io error",
             Self::InvalidCommand => "invalid command",
@@ -71,13 +71,11 @@ impl From<PixelflutErrorKind> for PixelflutError {
 impl PixelflutError {
     /// Returns the corresponding `ErrorKind` for this error.
     #[must_use]
-    pub fn kind(&self) -> PixelflutErrorKind {
+    pub const fn kind(&self) -> PixelflutErrorKind {
         match self.repr {
             Repr::Io(_) => PixelflutErrorKind::Io,
-            Repr::ParseInt(_) => PixelflutErrorKind::Parse,
-            Repr::Utf8(_) => PixelflutErrorKind::Parse,
-            Repr::Simple(kind) => kind,
-            Repr::Description(kind, _) => kind,
+            Repr::ParseInt(_) | Repr::Utf8(_) => PixelflutErrorKind::Parse,
+            Repr::Simple(kind) | Repr::Description(kind, _) => kind,
         }
     }
 }
@@ -102,8 +100,7 @@ impl error::Error for PixelflutError {
             Repr::Io(ref err) => err.source(),
             Repr::ParseInt(ref err) => err.source(),
             Repr::Utf8(ref err) => err.source(),
-            Repr::Simple(..) => None,
-            Repr::Description(..) => None,
+            Repr::Simple(..) | Repr::Description(..) => None,
         }
     }
 }
